@@ -11,19 +11,29 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## GitHub Documents
+## Central Question
+What question did you set out to answer?
 
-This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
 
-## Including Code
+
+## Background
+What is the relevant background on your question?
+- Read up on and document background information on these data; you will have to provide background on the new data source in your report.
+
+
+## Data 
+What data did you find to help answer that question? 
+  - Explore the dataset with EDA techniques, document your observations.
+What is the quality of those data?
+  - Comment on the quality of the data: How reputable is the source? How well-documented are their data-collection procedures? What potential errors might be in the data? What factors could contribute to missingness in the data?
+
+
 
 You can include R code in the document as follows:
 
 ```{r cars}
 summary(cars)
 ```
-
-## Including Plots
 
 You can also embed plots, for example:
 
@@ -32,3 +42,10 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Conclusions
+What conclusions did you come to?
+
+## Remaining Questions
+What questions do you have remaining?
+
