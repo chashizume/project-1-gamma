@@ -14,12 +14,11 @@ curl::curl_download(
 
 ## Loads the downloaded csv
 df_covid <- read_csv(filename_nyt)
-df_pop %>% glimpse
-df_covid %>% glimpse
+
+
 # data <- read.csv("covid_short_data.csv")
-df_q3 <- df_pop %>% mutate(fips = str_sub(id, -5))
-df_q4 <- df_q3 %>% 
-  inner_join(df_covid, by='fips')
+df_q3 <- df_pop %>% mutate(fips = str_sub(id, -2))
+df_q4 <- df_q3 %>% inner_join(df_covid, by='fips')
 
 df_data <-
     df_q4 %>%
