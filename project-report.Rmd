@@ -21,6 +21,10 @@ What question did you set out to answer?
 What is the relevant background on your question?
 - Read up on and document background information on these data; you will have to provide background on the new data source in your report.
 
+Google Trends data is a sample of the Google search data that shows a measure of interest in a keyword and topic over time. Google trends anonymized, categorized, and grouped together data, from which we can access a representative sample processed within minutes. It also normalizes search data by dividing each data point by total searches of location and time it represents and scaling numbers on a range of 0 to 100.
+We pulled data from Google Trends to see how people react to different moments during the pandemic and explore the magnitude of those moments.
+To access this data, we used the R package 'gtrendsR' which scrapes the Google Trends site. We used gtrends() with different parameters for search keyword, time, and geographical location.
+
 
 ## Data 
 What data did you find to help answer that question? 
