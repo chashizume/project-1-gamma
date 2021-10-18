@@ -8,49 +8,103 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(gtrendsR)
+library(tidyquant)
+library(corrr)
+library(ggcorrplot)
 ```
 
-## Central Question
-What question did you set out to answer?
+# Google Trends and the Pandemic
 
+### Authors: Megan, Colin, Claire, Meagan, Akoua
 
+## Introduction
+
+In this project, our team set out to explore relationships between Google search trends and the state of the COVID-19 pandemic. Our central question was the following: "How does Google search activity correlate with the pandemic?"
 
 ## Background
-What is the relevant background on your question?
-- Read up on and document background information on these data; you will have to provide background on the new data source in your report.
 
-Google Trends data is a sample of the Google search data that shows a measure of interest in a keyword and topic over time. Google trends anonymized, categorized, and grouped together data, from which we can access a representative sample processed within minutes. It also normalizes search data by dividing each data point by total searches of location and time it represents and scaling numbers on a range of 0 to 100.
-We pulled data from Google Trends to see how people react to different moments during the pandemic and explore the magnitude of those moments.
-To access this data, we used the R package 'gtrendsR' which scrapes the Google Trends site. We used gtrends() with different parameters for search keyword, time, and geographical location.
+### Google Trends
 
+[Google Trends](https://trends.google.com/trends/?geo=US) provides Google search data, showing a measure of interest in a keyword and topic over time. Google trends anonymizes, categorizes, and groups together data, from which we can access a representative sample. It also normalizes search data by dividing each data point by total searches of location and time it represents and scaling numbers on a range of 0 to 100.
 
-## Data 
-What data did you find to help answer that question? 
-  - Explore the dataset with EDA techniques, document your observations.
-What is the quality of those data?
-  - Comment on the quality of the data: How reputable is the source? How well-documented are their data-collection procedures? What potential errors might be in the data? What factors could contribute to missingness in the data?
+We pulled data from Google Trends to see how people react to different moments during the pandemic and explore the magnitude of those moments. When choosing specific search terms, we looked at the visual output on the Google Trends site to see if we can discover interesting patterns before bringing the data into R
 
+To access Google Trends data without having to manually downloading .csv files for each query, we used the R package [`gtrendsR`](https://cran.r-project.org/web/packages/gtrendsR/gtrendsR.pdf) which scrapes the Google Trends site. We used `gtrends()` with different parameters for search keyword, time, and geographical location.
 
+### New York Times COVID-19 Cases
 
-You can include R code in the document as follows:
+The New York Times has been collecting and publishing COVID case and death data since the first recorded case back in January 2020. The dataset is collected from local and state governments and health department in the Times' attempt to create a fuller picture of the pandemic. Data is reported by county and state and is publicly available via [GitHub](https://github.com/nytimes/covid-19-data).
 
-```{r cars}
-summary(cars)
+We pair the above COVID data with population data from the [Census Bureau](https://www.census.gov/data.html), and follow the steps provided in c06.
+
+### Our World in Data Vaccination Rates
+
+To look at vaccination rates, we used the Our World in Data vaccinations dataset, found on their [GitHub](https://github.com/owid/covid-19-data/tree/master/public/data/vaccinations). This data is collected by the **Our World In Data Team** based on official vaccination reports. According to their [site](https://ourworldindata.org/covid-vaccinations), "Our vaccination dataset uses the most recent official numbers from governments and health ministries worldwide. Population estimates for per-capita metrics are based on the United Nations World Population Prospects. Income groups are based on the World Bank classification."
+
+## Exploratory Data Analysis
+
+To import the COVID-19 case and death data, we will start by repeating the steps outlined in c06 by importing NYT data and Census data and creating one dataset.
+
+The population data can be found [here](https://data.census.gov/cedsci/table?q=United%20States&t=Population%20Total&g=0100000US%240500000&tid=ACSDT1Y2017.B01003&vintage=2017&layer=state&cid=DP05_0001E).
+
+```{r}
+# Code taken from c06; credit to Zach del Rosario, professor at Olin College
+
+df_pop <- read_csv(
+  "./data/ACSDT5Y2018.B01003_data_with_overlays_2021-10-05T112340.csv", 
+  skip = 1
+)
+
+## URL for the NYT covid-19 county-level data, raw
+url_counties <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+filename_nyt <- "./data/nyt_counties.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_counties,
+        destfile = filename_nyt
+      )
+
+## Loads the downloaded csv
+df_covid <- read_csv(filename_nyt)
+
+df_pop <- df_pop %>%
+  mutate(fips = str_sub(id, -5))
+
+df_covid <- df_covid %>%
+  left_join(df_pop, "fips")
+
+df_data <-
+  df_covid %>%
+  select(
+    date,
+    county,
+    state,
+    fips,
+    cases,
+    deaths,
+    population = `Estimate!!Total`
+  )
+
+df_normalized <- df_data %>%
+  mutate(
+    total_cases_per100k = cases / population * 100000,
+    total_deaths_per100k = deaths / population * 100000
+  )
+
+df_normalized
 ```
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+What data did you find to help answer that question?
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+-   Explore the dataset with EDA techniques, document your observations. What is the quality of those data?
+-   Comment on the quality of the data: How reputable is the source? How well-documented are their data-collection procedures? What potential errors might be in the data? What factors could contribute to missingness in the data?
 
-## Conclusions
 What conclusions did you come to?
 
 ## Remaining Questions
-What questions do you have remaining?
 
+What questions do you have remaining?
