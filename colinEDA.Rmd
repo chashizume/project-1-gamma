@@ -434,13 +434,13 @@ ggplot(NULL) +
 
 ```
 
-```{r, fig.height=3}
+```{r, fig.height=6}
 library(gtrendsR)
 library(tidyquant)
 a <- gtrends(c("ivermectin for sale"), time = "today+5-y", geo = c("US"))
 
 b <- a$interest_over_time %>%
-  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = replace(hits, hits == "<1", "0")) %>%
   mutate(hits = as.integer(hits)) %>%
   filter(date >= as.Date("2019-10-01"))
 
@@ -450,22 +450,55 @@ c <- df_normalized %>%
   group_by(date) %>%
   summarize(cases = sum(cases)) %>%
   mutate(dcases_dt = cases - lag(cases))
-ggplot(NULL) +
-  #geom_line(data = c, mapping = aes(x =  as.POSIXct(date), y = dcases_dt))+
-  geom_ma(data = c, ma_fun = SMA, n = 7, mapping = aes(x =  as.POSIXct(date), y = dcases_dt, color = "Daily COVID cases"), linetype = 2)+
-  geom_line(data = b, mapping = aes(x =  as.POSIXct(date), y = hits*num, color = "Search popularity")) +
-  
+  ggplot(NULL) +
+  geom_ma(
+    data = c, 
+    ma_fun = SMA, 
+    n = 7, 
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = dcases_dt, 
+      color = "Daily COVID cases",
+      linetype = "Daily COVID cases"
+    )) +
+  geom_line(
+    data = b, 
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = hits*num, 
+      color = "Search popularity",
+      linetype = "Search popularity"
+    )
+  ) +
   scale_y_continuous(
-    
     name = "Daily COVID cases",
-    
     sec.axis = sec_axis(~.*1/num, name="Search Popularity")
   ) +
-  theme_minimal() +
-  labs(x = "Date", title = "Google searches for 'Ivermectin for sale' versus daily COVID cases", color = "Data") +
+  labs(
+    x = "Date", 
+    y = "New COVID cases, 7-day rolling average",
+    title = 
+      "Google search popularity for 'Ivermectin for sale' and COVID cases"
+  ) +
   theme(plot.title = element_text(hjust = 0.5)) +
-  scale_color_manual(name = "Data", values = c("Search popularity" = "darkred", "Daily COVID cases" = "steelblue"))
-
+  scale_color_manual(
+    name = "Data",
+    breaks = c("Search popularity", "Daily COVID cases"),
+    values = c(
+      "Search popularity" = "darkred", 
+      "Daily COVID cases" = "steelblue"
+    )) +
+  scale_linetype_manual(
+    name = "Data",
+    values = c(
+      "Search popularity" = 1, 
+      "Daily COVID cases" = 2
+    )
+  ) + 
+  guides(
+    fill = guide_legend(keywidth = 3, keyheight = 1), 
+    linetype = guide_legend(keywidth = 3, keyheight = 1)
+  )
 ```
 
 ```{r, fig.height=3}
@@ -559,20 +592,20 @@ d <- c %>%
 
 d
 
-library(corrr)
-d %>%
-  group_by(keyword) %>%
-  summarize(cases = cases, hits = hits)
-  correlate()
+# library(corrr)
+# d %>%
+#   group_by(keyword) %>%
+#   summarize(cases = cases, hits = hits) %>%
+#   correlate()
 
 ```
 
 ```{r}
-map(~rownames_to_column(.x, var="measure1")) %>%
-  # format each data set (r,P,n) long
-  map(~pivot_longer(.x, -measure1, "measure2")) %>%
-  # merge our three list elements by binding the rows
-  bind_rows(.id = "id") %>%
-  head() %>%
-  kable()
+# map(~rownames_to_column(.x, var="measure1")) %>%
+#   # format each data set (r,P,n) long
+#   map(~pivot_longer(.x, -measure1, "measure2")) %>%
+#   # merge our three list elements by binding the rows
+#   bind_rows(.id = "id") %>%
+#   head() %>%
+#   kable()
 ```
