@@ -27,7 +27,7 @@ In this project, our team set out to explore relationships between Google search
 
 ### Google Trends
 
-[Google Trends](https://trends.google.com/trends/?geo=US) provides Google search data, showing a measure of interest in a keyword and topic over time. Google trends anonymizes, categorizes, and groups together data, from which we can access a representative sample. It also normalizes search data by dividing each data point by total searches of location and time it represents and scaling numbers on a range of 0 to 100.
+[Google Trends](https://trends.google.com/trends/?geo=US)[1] provides Google search data, showing a measure of interest in a keyword and topic over time. Google trends anonymizes, categorizes, and groups together data, from which we can access a representative sample. It also normalizes search data by dividing each data point by total searches of location and time it represents and scaling numbers on a range of 0 to 100.
 
 We pulled data from Google Trends to see how people react to different moments during the pandemic and explore the magnitude of those moments. When choosing specific search terms, we looked at the visual output on the Google Trends site to see if we can discover interesting patterns before bringing the data into R
 
@@ -35,13 +35,13 @@ To access Google Trends data without having to manually downloading .csv files f
 
 ### New York Times COVID-19 Cases and Census Bureau
 
-The New York Times has been collecting and publishing COVID case and death data since the first recorded case back in January 2020. The dataset is collected from local and state governments and health department in the Times' attempt to create a fuller picture of the pandemic. Data is reported by county and state and is publicly available via [GitHub](https://github.com/nytimes/covid-19-data).
+The New York Times (NYT) has been collecting and publishing COVID case and death data since the first recorded case back in January 2020. The dataset is collected from local and state governments and health department in the Times' attempt to create a fuller picture of the pandemic. Data is reported by county and state and is publicly available via [GitHub](https://github.com/nytimes/covid-19-data).
 
 We pair the above COVID data with population data from the [Census Bureau](https://www.census.gov/data.html), and follow the steps provided in c06. The population data can be found [here](https://data.census.gov/cedsci/table?q=United%20States&t=Population%20Total&g=0100000US%240500000&tid=ACSDT1Y2017.B01003&vintage=2017&layer=state&cid=DP05_0001E).
 
 ### Our World in Data Vaccination Rates
 
-To look at vaccination rates, we used the Our World in Data vaccinations dataset, found on their [GitHub](https://github.com/owid/covid-19-data/tree/master/public/data/vaccinations). This data is collected by the **Our World In Data Team** based on official vaccination reports. According to their [site](https://ourworldindata.org/covid-vaccinations), "Our vaccination dataset uses the most recent official numbers from governments and health ministries worldwide. Population estimates for per-capita metrics are based on the United Nations World Population Prospects. Income groups are based on the World Bank classification."
+To look at vaccination rates, we used the Our World in Data (OWID) vaccinations dataset, found on their [GitHub](https://github.com/owid/covid-19-data/tree/master/public/data/vaccinations). This data is collected by the **Our World In Data Team** based on official vaccination reports. According to their [site](https://ourworldindata.org/covid-vaccinations), "Our vaccination dataset uses the most recent official numbers from governments and health ministries worldwide. Population estimates for per-capita metrics are based on the United Nations World Population Prospects. Income groups are based on the World Bank classification."
 
 ## Exploratory Data Analysis
 
@@ -100,10 +100,13 @@ glimpse(df_normalized)
 
 summary(df_normalized)
 ```
-- Observations here!
--   Explore the dataset with EDA techniques, document your observations. What is the quality of those data?
--   Comment on the quality of the data: How reputable is the source? How well-documented are their data-collection procedures? What potential errors might be in the data? What factors could contribute to missingness in the data?
+### Dataset observations
 
+The New York Times and the Census Bureau are very reputable sources. The NYT is sourcing their data from government and public health authorities, while the Census is notably conducted as a government means of tracking population data. 
+
+The current combined dataset has location, population, and time-based COVID case and death data. Based on the numbers shown through the `summarise()` function, we can see that the case and death counts are cumulative, not per day, as we may be used to when looking at NYT COVID charts.
+
+Like with any dataset, there are limitations. Since this data is reported and not automatically recorded by a sensor, per say, there's always room for undereporting, which is a [major concern](https://www.npr.org/2019/06/04/728034176/2020-census-could-lead-to-worst-undercount-of-black-latinx-people-in-30-years) when it comes to conducting the Census and using it to make legislative decisions [2]. There have been several moments in the last year and a half where the NYT had to update their data to fix double-counted cases, or when certain jurisdictions would report high numbers of cases or deaths after not reporting any for a few days. Overall, though, the credibility of both datasets is clear, and these two sources are some of the best for using in our EDA.
 
 ### Vaccination Data
 
@@ -150,3 +153,11 @@ What conclusions did you come to?
 ## Remaining Questions
 
 What questions do you have remaining?
+
+
+<!-- -------------------------------------------------- -->
+
+[1] More information on how Google Trends creates its normalized data can be found [here](https://support.google.com/trends/answer/4365533?hl=en&ref_topic=6248052).
+
+[2] Census under-counting was [exacerbated by the Trump Administration and the pandemic](https://news.yahoo.com/2020-census-may-massively-undercounted-094704777.html?guccounter=1&guce_referrer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8&guce_referrer_sig=AQAAAEEy4BmL812XqU3FmbpwVkGRnhKpWWB-qIMHFIPa-zf9kH56QFEAGeveCzFT0CDIBYR9eH1Gdbm6fmrZrhr3hIvE_2x716qUfGWKLuGvs-xYSSxASbwzL4L1d245nmIs0t-WYePjd2OckYH0snqM1Cykf2pStCkcZDU44-5G8JIU) in 2020, which will have lasting negative effects on minority Americans.
+
