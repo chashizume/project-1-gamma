@@ -33,11 +33,11 @@ We pulled data from Google Trends to see how people react to different moments d
 
 To access Google Trends data without having to manually downloading .csv files for each query, we used the R package [`gtrendsR`](https://cran.r-project.org/web/packages/gtrendsR/gtrendsR.pdf) which scrapes the Google Trends site. We used `gtrends()` with different parameters for search keyword, time, and geographical location.
 
-### New York Times COVID-19 Cases
+### New York Times COVID-19 Cases and Census Bureau
 
 The New York Times has been collecting and publishing COVID case and death data since the first recorded case back in January 2020. The dataset is collected from local and state governments and health department in the Times' attempt to create a fuller picture of the pandemic. Data is reported by county and state and is publicly available via [GitHub](https://github.com/nytimes/covid-19-data).
 
-We pair the above COVID data with population data from the [Census Bureau](https://www.census.gov/data.html), and follow the steps provided in c06.
+We pair the above COVID data with population data from the [Census Bureau](https://www.census.gov/data.html), and follow the steps provided in c06. The population data can be found [here](https://data.census.gov/cedsci/table?q=United%20States&t=Population%20Total&g=0100000US%240500000&tid=ACSDT1Y2017.B01003&vintage=2017&layer=state&cid=DP05_0001E).
 
 ### Our World in Data Vaccination Rates
 
@@ -46,8 +46,6 @@ To look at vaccination rates, we used the Our World in Data vaccinations dataset
 ## Exploratory Data Analysis
 
 To import the COVID-19 case and death data, we will start by repeating the steps outlined in c06 by importing NYT data and Census data and creating one dataset.
-
-The population data can be found [here](https://data.census.gov/cedsci/table?q=United%20States&t=Population%20Total&g=0100000US%240500000&tid=ACSDT1Y2017.B01003&vintage=2017&layer=state&cid=DP05_0001E).
 
 ```{r}
 # Code taken from c06; credit to Zach del Rosario, professor at Olin College
@@ -96,7 +94,9 @@ df_normalized <- df_data %>%
     total_deaths_per100k = deaths / population * 100000
   )
 
-df_normalized
+glimpse(df_normalized)
+
+summary(df_normalized)
 ```
 
 
