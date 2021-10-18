@@ -145,6 +145,23 @@ summary(df_vax)
 
 One reason we turned to the OWID dataset is because Google uses this data to create their in-house visuals related to COVID vaccinations, which spoke to the credibility of the data. For the scope of our project, we're more focused on the US, but this dataset does have international data. The per-capita values are calculated "based on the United Nations World Population Prospects", according to the OWID [site](https://ourworldindata.org/covid-vaccinations).
 
+In detail, the following variables are in this combined dataset:
+- `location`, `iso_code`: filtered to be "United States" and "US".
+- `date`: Date of reported vaccinations
+- `total_vaccinations`: number of doses delivered. For vaccines that require multiple doses, each individual dose is counted
+- `people_vaccinated`: total number of people vaccinated
+- `people_fully_vaccinated`: total number of people fully vaccinated (1 J&J, 2 Moderna/Pfizer)
+- `total_boosters`: total number of booster shots injected
+- `daily_vaccinations_raw`: daily change in the total number of doses administered; it is only calculated for consecutive days. This is a raw measure provided for data checks and transparency; OWID recommends using `daily_vaccinations` instead
+- `daily_vaccinations`: new doses administered per day (7-day smoothed)
+- `total_vaccinations_per_hundred`: `total_vaccinations` per 100 people in total population of the country
+- `people_vaccinated_per_hundred`: `people_vaccinated` per 100 people in total population of the country
+- `people_fully_vaccinated_per_hundred`: `people_fully_vaccinated` per 100 people in total population of the country
+- `total_boosters_per_hundred`: `total_boosters` per 100 people in total population of the country
+- `daily_vaccinations_per_million`: `daily_vaccinations` per one million people in total population of the country    
+
+Like with the COVID case and death data, we can assume there are going to be several days where vaccination numbers are not going to be reported, especially if many places don't distribute vaccinations on certain weekends or holidays. This could offer one explanation for the many NAs prevalent in this dataset. Because this data is likely reported from places that are actively distributing vaccines, we can assume minimal error with the exception of human miscounting. Unlike with the Census data, people who are getting vaccinated will have had to come into contact with some sort of healthcare professional in order to receive the vaccine, at which point they will likely get recorded. I think data reliability becomes more of an issue where the vaccine rollout infrastructure isn't as defined, and where vaccines are scarcer, which may be more of the case in developing countries or countries with low access to vaccines.
+
 ### Google Trends Data
 
 We began by extracting data from Google trends and converting into a format which is useful for us. The data comes in as a  list of dataframes which describe the time-dependent, location-dependent, and related searches to the given queries. We begin by extracting the time-dependent data, replacing the "<1" elements with 0 so it can be converted to a numeric type, and selecting a data range we want to look at. We can then plot the popularity of searches over time.
