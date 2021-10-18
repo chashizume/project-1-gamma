@@ -117,7 +117,7 @@ In detail, the following variables are in this combined dataset:
 - `total_cases_per100k`: `cases` normalized for population size
 - `total_deaths_per100k`: `deaths` normalized for population size
 
-Like with any dataset, there are limitations. Since this data is reported and not automatically recorded by a sensor, per say, there's always room for undereporting, which is a [major concern](https://www.npr.org/2019/06/04/728034176/2020-census-could-lead-to-worst-undercount-of-black-latinx-people-in-30-years) when it comes to conducting the Census and using it to make legislative decisions [2]. There have been several moments in the last year and a half where the NYT had to update their data to fix double-counted cases, or when certain jurisdictions would report high numbers of cases or deaths after not reporting any for a few days [3]. Overall, though, the credibility of both datasets is clear, and these two sources are some of the best for using in our EDA.
+Like with any dataset, there are limitations. Since this data is reported and not automatically recorded by a sensor, per say, there's always room for undereporting, which is a [major concern](https://www.npr.org/2019/06/04/728034176/2020-census-could-lead-to-worst-undercount-of-black-latinx-people-in-30-years) when it comes to conducting the Census and using it to make legislative decisions [2]. There have been several moments in the last year and a half where the NYT had to update their data to fix double-counted cases, or when certain jurisdictions would report high numbers of cases or deaths after not reporting any for a few days [3]. Overall, though, the credibility of both datasets is clear, and these two sources are some of the best for using in our EDA. In short, the data isn't perfect, but it doesn't get much better than this for people-based data.
 
 ### Vaccination Data
 
@@ -139,14 +139,11 @@ df_vax <- read_csv(filename_vax) %>%
   drop_na(daily_vaccinations)
 
 glimpse(df_vax)
-summarize(df_vax)
+summary(df_vax)
 ```
+#### Dataset observations
 
-- Observations here!
--   Explore the dataset with EDA techniques, document your observations. What is the quality of those data?
--   Comment on the quality of the data: How reputable is the source? How well-documented are their data-collection procedures? What potential errors might be in the data? What factors could contribute to missingness in the data?
-
-
+One reason we turned to the OWID dataset is because Google uses this data to create their in-house visuals related to COVID vaccinations, which spoke to the credibility of the data. For the scope of our project, we're more focused on the US, but this dataset does have international data. The per-capita values are calculated "based on the United Nations World Population Prospects", according to the OWID [site](https://ourworldindata.org/covid-vaccinations).
 
 ### Google Trends Data
 
