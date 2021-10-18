@@ -465,7 +465,7 @@ ggplot(NULL) +
   labs(x = "Date", title = "Google searches for 'Ivermectin for sale' versus daily COVID cases", color = "Data") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_color_manual(name = "Data", values = c("Search popularity" = "darkred", "Daily COVID cases" = "steelblue"))
-
+ggsave("ivermectin.png", height = 3, width = 7)
 ```
 
 ```{r, fig.height=3}

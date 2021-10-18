@@ -454,6 +454,56 @@ df_corrplot
 df_corrplot %>%
   pivot_longer(!term, names_to = "term2", values_to = "count") %>%
   ggplot() +
-  geom_point(mapping = aes(x = term, y = term2, size = abs(count), color = count))
+  geom_point(mapping = aes(x = reorder(term, desc(term)), y = term2, size = abs(count), color = count))+
+  scale_color_gradient2(midpoint=0, low="blue", mid="white",
+                     high="red", space ="Lab", limits = c(-1,1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_size(limits = c(0,1))
+                     
 
+```
+
+```{r}
+df_corrplot %>%
+  pivot_longer(!term, names_to = "term2", values_to = "count") %>%
+  ggplot() +
+  geom_point(mapping = aes(x = term, y = term2, size = abs(count), color = count))
+df_corr
+df_corr %>%
+  ggplot()+
+  geom_point(mapping = aes(x = get("vaccine causes covid"), y = get("vaccine death")))
+```
+
+```{r}
+
+df_corr2 <- df_weekly_covid %>%
+  left_join(df_vax, by = 'date') %>%
+  left_join(df_searches, by = 'date') %>%
+  select(cases, deaths, daily_vaccinations, people_fully_vaccinated, "vaccine death", "vaccine causes covid", "vaccine 5g", "vaccine microchip", "mesh mask", "date")
+df_corr2
+k <- 1:28
+col_names <- paste0("lag_", k)
+e <- df_corr2 %>%
+  mutate(date = as.POSIXct.Date(date)) %>%
+  select(cases, deaths, date) %>%
+    tq_mutate(
+        select     = deaths,
+        mutate_fun = lag.xts,
+        k          = 1:28,
+        col_rename = col_names
+    )
+e %>%
+  ggplot() +
+  geom_point(aes(x = cases, y = lag_14))
+
+
+e %>%
+    gather(key = "lag", value = "lag_value", -c(cases, date, deaths)) %>%
+    mutate(lag = str_sub(lag, start = 5) %>% as.numeric) %>%
+    group_by(package, lag) %>%
+    summarize(
+        cor = cor(x = count, y = lag_value, use = "pairwise.complete.obs"),
+        cutoff_upper = 2/(n())^0.5,
+        cutoff_lower = -2/(n())^0.5
+        )
 ```
