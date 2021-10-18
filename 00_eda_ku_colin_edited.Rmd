@@ -1,0 +1,459 @@
+---
+title: "Megan COVID EDA"
+author: "Megan Ku"
+date: 2021-10-14
+output:
+  github_document:
+    toc: true
+---
+
+This document covers Megan's EDA for the COVID-19 Project in Data Science F2021.
+
+```{r}
+library(tidyverse)
+library(gtrendsR)
+library(tidyquant)
+library(corrr)
+library(ggcorrplot)
+```
+
+```{r}
+hoax_trends <- gtrends(
+  c(
+    "herd immunity", 
+    "vaccine 5G",
+    "covid bats", 
+    "vaccine death",
+    "vaccine miscarriage"
+    ), 
+  geo = c("US", "US", "US", "US", "US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+```
+
+```{r}
+df_pop <- read_csv(
+  "./data/ACSDT5Y2018.B01003_data_with_overlays_2021-10-05T112340.csv", 
+  skip = 1
+)
+
+## URL for the NYT covid-19 county-level data
+url_counties <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+filename_nyt <- "./data/nyt_counties.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_counties,
+        destfile = filename_nyt
+      )
+
+## Loads the downloaded csv
+df_covid <- read_csv(filename_nyt)
+
+df_pop <- df_pop %>%
+  mutate(fips = str_sub(id, -5))
+
+df_covid <- df_covid %>%
+  left_join(df_pop, "fips")
+
+df_data <-
+  df_covid %>%
+  select(
+    date,
+    county,
+    state,
+    fips,
+    cases,
+    deaths,
+    population = `Estimate!!Total`
+  )
+
+df_normalized <- df_data %>%
+  mutate(
+    total_cases_per100k = cases / population * 100000,
+    total_deaths_per100k = deaths / population * 100000
+  )
+
+df_normalized
+```
+
+```{r}
+df_national_data <- df_covid %>%
+  group_by(date) %>%
+  summarize(
+    total_cases = sum(cases, na.rm = TRUE),
+    total_deaths = sum(deaths, na.rm = TRUE)
+  ) %>%
+  mutate(
+    new_cases = total_cases - lag(total_cases),
+    new_cases = ifelse(is.na(new_cases), 0, new_cases),
+    new_deaths = total_deaths - lag(total_deaths),
+    new_deaths = ifelse(is.na(new_deaths), 0, new_deaths)
+  )
+
+tail(df_national_data)
+```
+
+```{r}
+hoax_data <- hoax_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+hoax_data
+```
+
+```{r}
+scale_factor <- max(df_national_data$new_cases) / max(hoax_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
+  geom_line(data = hoax_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+```{r}
+## URL for the OWID vaccination data
+url_vax <- 
+  "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"
+filename_vax <- "./data/owid_vax.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_vax,
+        destfile = filename_vax
+      )
+
+## Loads the downloaded csv
+df_vax <- read_csv(filename_vax) %>%
+  filter(location == "United States") %>%
+  drop_na(daily_vaccinations)
+
+df_vax
+```
+
+```{r, fig.height=5}
+scale_factor <- max(df_vax$daily_vaccinations) / max(hoax_data$hits)
+
+ggplot() +
+  geom_line(data = df_vax, aes(x = date, y = daily_vaccinations)) +
+  geom_line(data = hoax_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of Vaccinated People in US", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+```{r}
+mask_hoax_trends <- gtrends(
+  c(
+    "masks carbon dioxide", 
+    "mesh mask",
+    "masks child development",
+    "covid deep state",
+    "covid communism"
+    ), 
+  geo = c("US", "US", "US", "US", "US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+mask_hoax_data <- mask_hoax_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+mask_hoax_data
+```
+
+```{r}
+scale_factor <- max(df_national_data$new_cases) / max(mask_hoax_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
+  geom_line(data = mask_hoax_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_sqrt(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+```{r}
+more_hoax_trends <- gtrends(
+  c(
+    "vaccine microchip",
+    "vaccine causes covid",
+    "covid QAnon",
+    "covid fascism"
+    ), 
+  geo = c("US", "US", "US", "US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+more_hoax_data <- more_hoax_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+more_hoax_data
+```
+
+```{r}
+scale_factor <- max(df_national_data$new_cases) / max(more_hoax_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
+  geom_line(data = more_hoax_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+```{r}
+scale_factor <- max(df_vax$daily_vaccinations) / max(more_hoax_data$hits)
+
+ggplot() +
+  geom_line(data = df_vax, aes(x = date, y = daily_vaccinations)) +
+  geom_line(data = more_hoax_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of Vaccinated People in US", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+Trends to explore deeper:
+
+-   vaccine death
+-   vaccine causes covid
+-   vaccine microchip
+-   mesh mask
+
+```{r}
+funny_trends <- gtrends(
+  c(
+    "animal crossing",
+    "among us",
+    "hand sanitizer",
+    "tiger king",
+    "work from home"
+    ), 
+  geo = c("US", "US", "US", "US", "US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+funny_data <- funny_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+funny_data
+```
+
+```{r}
+scale_factor <- max(df_national_data$new_cases) / max(funny_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
+  geom_line(data = funny_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+```{r}
+other_trends <- gtrends(
+  c(
+    "funeral"
+    ), 
+  geo = c("US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+other_data <- other_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+other_data
+```
+
+```{r}
+scale_factor <- max(df_national_data$new_cases) / max(other_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
+  geom_line(data = other_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+```{r}
+scale_factor <- max(df_national_data$total_deaths) / max(other_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = total_deaths)) +
+  geom_line(data = other_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  # geom_ma(data = other_data, ma_fun = SMA, n = 2, mapping = aes(x = date, y = hits * scale_factor)) +
+  scale_y_continuous(name="Total COVID Deaths", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+```{r}
+df_national_data
+
+```
+
+```{r}
+covid_5g <- gtrends(
+  c("vaccine 5g"), 
+  geo = c("US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+covid_5g <- covid_5g$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+scale_factor <- max(df_national_data$new_deaths) / max(covid_5g$hits)
+
+ggplot() +
+  # geom_line(data = df_national_data, aes(x = date, y = new_deaths)) +
+  geom_ma(data = df_national_data, ma_fun = SMA, n = 2, mapping = aes(x = date, y = new_deaths)) +
+  geom_ma(data = covid_5g, ma_fun = SMA, n = 2, mapping = aes(x = date, y = hits * scale_factor), linetype = 1) +
+  # geom_line(data = covid_5g, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of New Deaths", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+```{r}
+scale_factor <- max(df_vax$daily_vaccinations) / max(covid_5g$hits)
+
+ggplot() +
+  geom_line(data = df_vax, aes(x = date, y = daily_vaccinations)) +
+  geom_ma(data = covid_5g, ma_fun = SMA, n = 2, mapping = aes(x = date, y = hits * scale_factor)) +
+  # geom_line(data = covid_5g, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of Vaccinated People in US", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+```
+
+```{r}
+df_vax_death <- 
+  gtrends(
+    c("vaccine death"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+df_vax_cause_covid <- 
+  gtrends(
+    c("vaccine causes covid"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+df_vax_microchip <- 
+  gtrends(
+    c("vaccine microchip"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+df_vax_5g <- 
+  gtrends(
+    c("vaccine 5g"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+df_mesh_mask <- 
+  gtrends(
+    c("mesh mask"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+```
+
+```{r}
+df_searches <- df_vax_death %>%
+  bind_rows(df_vax_cause_covid) %>%
+  bind_rows(df_vax_5g) %>%
+  bind_rows(df_vax_microchip) %>%
+  bind_rows(df_mesh_mask) %>%
+  pivot_wider(
+    names_from = keyword,
+    values_from = hits 
+  )
+```
+
+```{r}
+df_weekly_covid <- df_national_data %>%
+  mutate(date = as.Date(cut(as.Date(date), "week")) - 1) %>%
+  group_by(date) %>%
+  summarise(
+    cases = mean(new_cases, na.rm = TRUE),
+    deaths = mean(new_deaths, na.rm = TRUE)
+  )
+  
+df_weekly_covid
+```
+
+```{r}
+df_vax_weekly <- df_vax %>%
+  mutate(date = as.Date(cut(date, "week")) - 1) %>%
+  group_by(date) %>%
+  summarise(
+    vaccinations = mean(daily_vaccinations, na.rm = TRUE)
+  )
+df_vax_weekly 
+```
+
+```{r}
+df_corr <- df_weekly_covid %>%
+  left_join(df_vax, by = 'date') %>%
+  left_join(df_searches, by = 'date') %>%
+  select(cases, deaths, daily_vaccinations, people_fully_vaccinated, "vaccine death", "vaccine causes covid", "vaccine 5g", "vaccine microchip", "mesh mask")
+
+df_corrplot <- correlate(df_corr) %>%
+  mutate_all(funs(ifelse(is.na(.), 1, .)))
+ggcorrplot(df_corrplot)
+
+df_corrplot %>%
+  rplot()
+```
+
+```{r}
+df_c <- Hmisc::rcorr(as.matrix(df_corr))
+
+formatted_cors <- function(df){
+  cors(df) %>%
+    map(~rownames_to_column(.x, var="measure1")) %>%
+    map(~pivot_longer(.x, -measure1, "measure2")) %>%
+    bind_rows(.id = "id") %>%
+    pivot_wider(names_from = id, values_from = value) %>%
+    rename(p = P) %>%
+    mutate(sig_p = ifelse(p < .05, T, F),
+           p_if_sig = ifelse(sig_p, p, NA),
+           r_if_sig = ifelse(sig_p, r, NA)) 
+}
+
+df_c <- formatted_cors(df_c)
+```
+
+```{r}
+
+df_corrplot
+df_corrplot %>%
+  pivot_longer(!term, names_to = "term2", values_to = "count") %>%
+  ggplot() +
+  geom_point(mapping = aes(x = term, y = term2, size = abs(count), color = count))
+
+```
