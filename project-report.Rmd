@@ -96,8 +96,6 @@ df_normalized <- df_data %>%
     total_deaths_per100k = deaths / population * 100000
   )
 
-
-
 glimpse(df_normalized)
 
 summary(df_normalized)
@@ -108,7 +106,18 @@ The New York Times and the Census Bureau are very reputable sources. The NYT is 
 
 The current combined dataset has location, population, and time-based COVID case and death data. Based on the numbers shown through the `summarise()` function, we can see that the case and death counts are cumulative, not per day, as we may be used to when looking at NYT COVID charts.
 
-Like with any dataset, there are limitations. Since this data is reported and not automatically recorded by a sensor, per say, there's always room for undereporting, which is a [major concern](https://www.npr.org/2019/06/04/728034176/2020-census-could-lead-to-worst-undercount-of-black-latinx-people-in-30-years) when it comes to conducting the Census and using it to make legislative decisions [2]. There have been several moments in the last year and a half where the NYT had to update their data to fix double-counted cases, or when certain jurisdictions would report high numbers of cases or deaths after not reporting any for a few days. Overall, though, the credibility of both datasets is clear, and these two sources are some of the best for using in our EDA.
+In detail, the following variables are in this combined dataset:
+- `date`: Date of reported cases and deaths
+- `county`: County
+- `state`: State
+- `fips`: FIPS code; unique to each county and state
+- `cases`: Number of cumulative cases
+- `deaths`: Number of cumulative deaths
+- `population`: Population of given county
+- `total_cases_per100k`: `cases` normalized for population size
+- `total_deaths_per100k`: `deaths` normalized for population size
+
+Like with any dataset, there are limitations. Since this data is reported and not automatically recorded by a sensor, per say, there's always room for undereporting, which is a [major concern](https://www.npr.org/2019/06/04/728034176/2020-census-could-lead-to-worst-undercount-of-black-latinx-people-in-30-years) when it comes to conducting the Census and using it to make legislative decisions [2]. There have been several moments in the last year and a half where the NYT had to update their data to fix double-counted cases, or when certain jurisdictions would report high numbers of cases or deaths after not reporting any for a few days [3]. Overall, though, the credibility of both datasets is clear, and these two sources are some of the best for using in our EDA.
 
 ### Vaccination Data
 
@@ -211,4 +220,6 @@ What questions do you have remaining?
 [1] More information on how Google Trends creates its normalized data can be found [here](https://support.google.com/trends/answer/4365533?hl=en&ref_topic=6248052).
 
 [2] Census under-counting was [exacerbated by the Trump Administration and the pandemic](https://news.yahoo.com/2020-census-may-massively-undercounted-094704777.html?guccounter=1&guce_referrer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8&guce_referrer_sig=AQAAAEEy4BmL812XqU3FmbpwVkGRnhKpWWB-qIMHFIPa-zf9kH56QFEAGeveCzFT0CDIBYR9eH1Gdbm6fmrZrhr3hIvE_2x716qUfGWKLuGvs-xYSSxASbwzL4L1d245nmIs0t-WYePjd2OckYH0snqM1Cykf2pStCkcZDU44-5G8JIU) in 2020, which will have lasting negative effects on minority Americans.
+
+[3] The New York Times also added an [FAQ section](https://www.nytimes.com/interactive/2020/us/about-coronavirus-data-maps.html) to help explain the dataset.
 
