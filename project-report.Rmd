@@ -76,6 +76,7 @@ df_pop <- df_pop %>%
 df_covid <- df_covid %>%
   left_join(df_pop, "fips")
 
+## Isolate specific columns
 df_data <-
   df_covid %>%
   select(
@@ -88,6 +89,7 @@ df_data <-
     population = `Estimate!!Total`
   )
 
+## Calculate case and death rates per 100k people
 df_normalized <- df_data %>%
   mutate(
     total_cases_per100k = cases / population * 100000,
