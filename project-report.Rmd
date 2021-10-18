@@ -183,7 +183,12 @@ ggplot(NULL) +
 ```
 If we take that same data and overlay daily COVID cases, we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on, before there were almost any cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any increase during the major wave in the latter part of 2021.
 
-The data from Google is aggregated over national searches
+
+### Quality of Google Data
+
+The data from Google is aggregated over national searches and normalized by search volume and location to represent an average popularity for a specific term. Google does not publish data for all search queries, so in some cases it is necessary to use a related term or there may be no data at all.
+
+Google does reprocessing on this data to remove searches they suspect to be machine generated or made intentionally to affect their numbers. 
 
 
 
