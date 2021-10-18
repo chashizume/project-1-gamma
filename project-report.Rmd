@@ -45,6 +45,8 @@ To look at vaccination rates, we used the Our World in Data vaccinations dataset
 
 ## Exploratory Data Analysis
 
+### NYT Covid Cases and Census Data
+
 To import the COVID-19 case and death data, we will start by repeating the steps outlined in c06 by importing NYT data and Census data and creating one dataset.
 
 ```{r}
@@ -98,12 +100,50 @@ glimpse(df_normalized)
 
 summary(df_normalized)
 ```
-
-
-What data did you find to help answer that question?
-
+- Observations here!
 -   Explore the dataset with EDA techniques, document your observations. What is the quality of those data?
 -   Comment on the quality of the data: How reputable is the source? How well-documented are their data-collection procedures? What potential errors might be in the data? What factors could contribute to missingness in the data?
+
+
+### Vaccination Data
+
+```{r}
+## URL for the OWID vaccination data
+url_vax <- 
+  "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"
+filename_vax <- "./data/owid_vax.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_vax,
+        destfile = filename_vax
+      )
+
+## Loads the downloaded csv
+df_vax <- read_csv(filename_vax) %>%
+  filter(location == "United States") %>%
+  drop_na(daily_vaccinations)
+
+glimpse(df_vax)
+summarize(df_vax)
+```
+
+- Observations here!
+-   Explore the dataset with EDA techniques, document your observations. What is the quality of those data?
+-   Comment on the quality of the data: How reputable is the source? How well-documented are their data-collection procedures? What potential errors might be in the data? What factors could contribute to missingness in the data?
+
+
+
+### Google Trends Data
+
+```{r}
+# EDA goes here
+```
+
+- Observations here!
+-   Explore the dataset with EDA techniques, document your observations. What is the quality of those data?
+-   Comment on the quality of the data: How reputable is the source? How well-documented are their data-collection procedures? What potential errors might be in the data? What factors could contribute to missingness in the data?
+
 
 What conclusions did you come to?
 
