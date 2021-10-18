@@ -195,11 +195,11 @@ If we take that same data and overlay daily COVID cases, we start to get a clear
 
 ### Quality of Google Data
 
-The data from Google is aggregated over national searches and normalized by search volume and location to represent an average popularity for a specific term. Google does not publish data for all search queries, so in some cases it is necessary to use a related term or there may be no data at all.
+The data from Google is aggregated over national searches and normalized by search volume and location to represent an average popularity for a specific term. Google does not publish data for all search queries, so in some cases it is necessary to use a related term or there may be no data at all. This scaling by relative proportions can often make it hard to understand the relative magnitude of searches as there is no real data which says how often a term is searched or what proportion of the population searched the term.
 
-Google does reprocessing on this data to remove searches they suspect to be machine generated or made intentionally to affect their numbers. 
+Google does preprocessing on this data to remove searches they suspect to be machine generated or made intentionally to affect their numbers. While we assume that this is done in a fair and unbiased manner we have now way of verifying their process as they do not disclose which specific steps they take. While this may be of concern for terms that are more likely to be spammed (election results, polling data) it likely has little if any effect for the terms we consider here.
 
-
+More generally, the data represents searches on Google so likely overcounts younger and more technology-connected populations and does not necessarily capture a representative proportion of the US public. Since Google provides no demographic information on the people who search for terms we do not know to what extent this skews the data.
 
 
 
