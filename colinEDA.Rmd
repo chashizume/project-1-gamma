@@ -1,0 +1,612 @@
+---
+title: "COVID-19"
+author: "Colin Snow"
+date: 2020-10-6
+output:
+  github_document:
+    toc: true
+---
+
+```{r q1-task}
+library(tidyverse)
+## TASK: Load the census bureau data with the following tibble name.
+df_pop <- read_csv("./data/ACSDT5Y2018.B01003_2021-10-05T144345/ACSDT5Y2018.B01003_data_with_overlays_2021-10-05T112340.csv", skip = 1)
+df_pop
+```
+
+*Note*: You can find information on 1-year, 3-year, and 5-year estimates [here](https://www.census.gov/programs-surveys/acs/guidance/estimates.html). The punchline is that 5-year estimates are more reliable but less current.
+
+## Automated Download of NYT Data
+
+<!-- ------------------------- -->
+
+ACS 5-year estimates don't change all that often, but the COVID-19 data are changing rapidly. To that end, it would be nice to be able to *programmatically* download the most recent data for analysis; that way we can update our analysis whenever we want simply by re-running our notebook. This next problem will have you set up such a pipeline.
+
+The New York Times is publishing up-to-date data on COVID-19 on [GitHub](https://github.com/nytimes/covid-19-data).
+
+### **q2** Visit the NYT [GitHub](https://github.com/nytimes/covid-19-data) repo and find the URL for the **raw** US County-level data. Assign that URL as a string to the variable below.
+
+```{r q2-task}
+## TASK: Find the URL for the NYT covid-19 county-level data
+url_counties <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+```
+
+Once you have the url, the following code will download a local copy of the data, then load the data into R.
+
+```{r download}
+## NOTE: No need to change this; just execute
+## Set the filename of the data to download
+filename_nyt <- "./data/nyt_counties.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_counties,
+        destfile = filename_nyt
+      )
+
+## Loads the downloaded csv
+df_covid <- read_csv(filename_nyt)
+```
+
+You can now re-run the chunk above (or the entire notebook) to pull the most recent version of the data. Thus you can periodically re-run this notebook to check in on the pandemic as it evolves.
+
+*Note*: You should feel free to copy-paste the code above for your own future projects!
+
+# Join the Data
+
+<!-- -------------------------------------------------- -->
+
+To get a sense of our task, let's take a glimpse at our two data sources.
+
+```{r glimpse}
+## NOTE: No need to change this; just execute
+df_pop %>% glimpse
+df_covid %>% glimpse
+```
+
+To join these datasets, we'll need to use [FIPS county codes](https://en.wikipedia.org/wiki/FIPS_county_code).[2] The last `5` digits of the `id` column in `df_pop` is the FIPS county code, while the NYT data `df_covid` already contains the `fips`.
+
+### **q3** Process the `id` column of `df_pop` to create a `fips` column.
+
+```{r q3-task}
+## TASK: Create a `fips` column by extracting the county code
+df_q3 <- df_pop %>%
+  mutate(fips = str_sub(id,-5,-1))
+```
+
+Use the following test to check your answer.
+
+```{r q3-tests}
+## NOTE: No need to change this
+## Check known county
+assertthat::assert_that(
+              (df_q3 %>%
+              filter(str_detect(`Geographic Area Name`, "Autauga County")) %>%
+              pull(fips)) == "01001"
+            )
+print("Very good!")
+```
+
+### **q4** Join `df_covid` with `df_q3` by the `fips` column. Use the proper type of join to preserve *only* the rows in `df_covid`.
+
+```{r q4-task}
+## TASK: Join df_covid and df_q3 by fips.
+df_q4 <- df_covid %>%
+  left_join(df_q3, by = "fips")
+```
+
+For convenience, I down-select some columns and produce more convenient column names.
+
+```{r rename}
+## NOTE: No need to change; run this to produce a more convenient tibble
+df_data <-
+  df_q4 %>%
+  select(
+    date,
+    county,
+    state,
+    fips,
+    cases,
+    deaths,
+    population = `Estimate!!Total`
+  )
+```
+
+# Analyze
+
+<!-- -------------------------------------------------- -->
+
+Now that we've done the hard work of loading and wrangling the data, we can finally start our analysis. Our first step will be to produce county population-normalized cases and death counts. Then we will explore the data.
+
+## Normalize
+
+<!-- ------------------------- -->
+
+### **q5** Use the `population` estimates in `df_data` to normalize `cases` and `deaths` to produce per 100,000 counts [3]. Store these values in the columns `cases_per100k` and `deaths_per100k`.
+
+```{r q5-task}
+## TASK: Normalize cases and deaths
+df_normalized <-
+  df_data %>%
+  mutate(cases_per100k = cases/population * 100000, deaths_per100k = deaths/population * 100000)
+```
+
+You may use the following test to check your work.
+
+```{r q5-tests}
+## NOTE: No need to change this
+## Check known county data
+if (any(df_normalized %>% pull(date) %>% str_detect(., "2020-01-21"))) {
+  assertthat::assert_that(TRUE)
+} else {
+  print(str_c(
+    "Date 2020-01-21 not found; did you download the historical data (correct),",
+    "or just the most recent data (incorrect)?",
+    sep = " "
+  ))
+  assertthat::assert_that(FALSE)
+}
+
+assertthat::assert_that(
+              abs(df_normalized %>%
+               filter(
+                 str_detect(county, "Snohomish"),
+                 date == "2020-01-21"
+               ) %>%
+              pull(cases_per100k) - 0.127) < 1e-3
+            )
+assertthat::assert_that(
+              abs(df_normalized %>%
+               filter(
+                 str_detect(county, "Snohomish"),
+                 date == "2020-01-21"
+               ) %>%
+              pull(deaths_per100k) - 0) < 1e-3
+            )
+
+print("Excellent!")
+```
+
+## Guided EDA
+
+<!-- ------------------------- -->
+
+Before turning you loose, let's complete a couple guided EDA tasks.
+
+### **q6** Compute the mean and standard deviation for `cases_per100k` and `deaths_per100k`.
+
+```{r q6-task}
+## TASK: Compute mean and sd for cases_per100k and deaths_per100k
+
+# Compute latest figures for each county (cases seem to be cumulative) and then sum over counties
+df_normalized %>%
+  group_by(county) %>%
+  summarize(
+    cases_per100k = max(cases_per100k),
+    deaths_per100k = max(deaths_per100k),
+  ) %>%
+  summarize(
+    mean_cases = mean(cases_per100k, na.rm = TRUE),
+    mean_deaths = mean(deaths_per100k, na.rm = TRUE)
+  )
+
+```
+
+### **q7** Find the top 10 counties in terms of `cases_per100k`, and the top 10 in terms of `deaths_per100k`. Report the population of each county along with the per-100,000 counts. Compare the counts against the mean values you found in q6. Note any observations.
+
+```{r q7-task}
+## TASK: Find the top 10 max cases_per100k counties; report populations as well
+
+df_normalized %>%
+  group_by(fips) %>%
+  summarize(
+    county = county[1], # all fips map to only one county name so we just grab the first
+    cases_per100k = max(cases_per100k),
+    deaths_per100k = max(deaths_per100k),
+    population = max(population) # The population is always the same
+  ) %>%
+  arrange(desc(cases_per100k))
+
+
+## TASK: Find the top 10 deaths_per100k counties; report populations as well
+
+df_normalized %>%
+  group_by(fips) %>%
+  summarize(
+    county = county[1], # all fips map to only one county name so we just grab the first
+    cases_per100k = max(cases_per100k),
+    deaths_per100k = max(deaths_per100k),
+    population = max(population) # The population is always the same
+  ) %>%
+  arrange(desc(deaths_per100k))
+
+```
+
+**Observations**:
+
+-   The county with the highest case rate has a below-average death rate. This is contrary to what would reasonably be expected if we assumed a direct correlation between cases and deaths. This suggests there are likely other factors at play that account for this discrepancy.
+-   The counties with the highest death rates are often quite small, with the highest rate occurring in a county of 662. That death rate corresponds to 7 deaths in the county which, while not a high number, is a high proportion of such a small population. The small sample rate of counties such as these makes them more likely to be outliers as only a few cases can dramatically change the relative rate.
+
+## Self-directed EDA
+
+<!-- ------------------------- -->
+
+### **q8** Drive your own ship: You've just put together a very rich dataset; you now get to explore! Pick your own direction and generate at least one punchline figure to document an interesting finding. I give a couple tips & ideas below:
+
+### Ideas
+
+<!-- ------------------------- -->
+
+-   Look for outliers.
+-   Try web searching for news stories in some of the outlier counties.
+-   Investigate relationships between county population and counts.
+-   Do a deep-dive on counties that are important to you (e.g. where you or your family live).
+-   Fix the *geographic exceptions* noted below to study New York City.
+-   Your own idea!
+
+**DO YOUR OWN ANALYSIS HERE**
+
+```{r fig.height=4}
+
+df_normalized_new <-
+  df_normalized %>%
+  left_join(data.frame(state = state.name, region = state.region), by = "state")
+
+df_normalized_new
+  
+
+
+
+df_normalized_new %>%
+ # filter(state %in% c("Massachusetts", "Maine", "New York", "Vermont", "New Hampshire", #"Connecticut", "Rhode Island")) %>%
+  group_by(fips) %>%
+  summarize(
+    county = county[1], # all fips map to only one county name so we just grab the first
+    state = state[1],
+    cases_per100k = max(cases_per100k),
+    deaths_per100k = max(deaths_per100k),
+    population = max(population), # The population is always the same
+    region = region[1]
+  ) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_boxplot(mapping = aes(x = reorder(state, cases_per100k, median), y = cases_per100k)) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    x = "State",
+    y = "Cases (per 100,000 persons)",
+    title = "Cases by county grouped by state for all states in US"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5)) 
+```
+
+-   Looking at the distribution of counties by state offers some interesting insights into the relative median rates and spreads of each state. Looking at the medians, there are huge differences between the lowest and highest rates, with states like Vermont being \~5000 and states like Tennessee pushing \~18000. However, the more interesting relationship seems to be in the width of the distributions. On average small states tend to have more tightly grouped distributions than large states. This makes sense as small states likely have fewer counties, and these counties are located more geographically close to each other. Where it gets particularly interesting is in looking at states that are large geographically versus large in size. For example, Alaska has a very wide distribution by county despite its low population and Massachusetts has a relatively wide distribution despite its small size.
+
+-   Many of the outliers in the previous graph have some relevant news articles, such as chattahoocee county, the county with the highest rate overall:
+
+    -   <https://www.wtvm.com/2021/02/10/chattahoochee-county-offers-insight-into-recent-uptick-covid-cases/>
+
+```{r}
+df_normalized_new %>%
+  group_by(fips) %>%
+  summarize(
+    county = county[1], # all fips map to only one county name so we just grab the first
+    state = state[1],
+    cases_per100k = max(cases_per100k),
+    deaths_per100k = max(deaths_per100k),
+    population = max(population), # The population is always the same
+    region = region[1],
+    cfr = max(deaths_per100k)/max(cases_per100k)
+  ) %>%
+  ungroup() %>%
+  filter(!region == "NA") %>%  # Remove codes with no region
+  ggplot() +
+  geom_boxplot(mapping = aes(x = region, y = cfr, color = region)) +
+  theme_minimal() +
+  labs(
+    x = "Region",
+    y = "Case fatality Rate",
+    title = "Case fatality rate for regions of US"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5), legend.position="none") 
+```
+
+-   Looking at the case fatality rate (deaths/cases) for different regions of the US gives us some insight into the effect of the disease beyond just case counts. The Northeast, despite having relatively low case counts overall, has a surprisingly high median fatality rate but has very few outliers compared to the other regions. The south has the highest median fatality rate, while the West has a remarkably low rate compared to the other three regions. All four regions seem to have a remarkably similar IQR considering their substantial variances in other ways.
+
+# Google Data
+
+```{r}
+
+```
+
+```{r}
+library(gtrendsR)
+a <- gtrends(c("covid", "coronavirus", "covid-19", "covid 19"), time = "today+5-y", geo = c("US", "US", "US", "US"))
+b <- a$interest_over_time %>%
+  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = as.integer(hits)) %>%
+  filter(date >= as.Date("2019-10-01"))
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases))
+ggplot(NULL) +
+  geom_line(data = c, mapping = aes(x =  as.POSIXct(date), y = dcases_dt))+
+  geom_line(data = b, mapping = aes(x =  as.POSIXct(date), y = hits*10000, color = keyword)) +
+  
+  scale_y_continuous(
+    
+    name = "Daily COVID cases",
+    
+    sec.axis = sec_axis(~.*.0001, name="Search Popularity")
+  )
+
+```
+
+```{r}
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases))
+c
+
+max(c$dcases_dt, na.rm = TRUE)
+```
+
+```{r}
+library(gtrendsR)
+a <- gtrends(c("vaccine", "covid vaccine", "moderna", "pfizer", "johnson and johnson"), time = "today+5-y", geo = c("US", "US", "US", "US", "US"))
+
+b <- a$interest_over_time %>%
+  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = as.integer(hits)) %>%
+  filter(date >= as.Date("2019-10-01"))
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases))
+ggplot(NULL) +
+  geom_line(data = c, mapping = aes(x =  as.POSIXct(date), y = dcases_dt))+
+  geom_line(data = b, mapping = aes(x =  as.POSIXct(date), y = hits*10000, color = keyword)) +
+  
+  scale_y_continuous(
+    
+    name = "Daily COVID cases",
+    
+    sec.axis = sec_axis(~.*.0001, name="Search Popularity")
+  )
+
+```
+
+```{r, fig.height=4}
+library(gtrendsR)
+a <- gtrends(c("johnson and johnson vaccine death", "death after covid vaccine", "vaccine death", "vaccine fatality", "johnson and johnson death"), time = "today+5-y", geo = c("US", "US", "US", "US", "US"))
+
+b <- a$interest_over_time %>%
+  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = as.integer(hits)) %>%
+  filter(date >= as.Date("2019-10-01"))
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases))
+ggplot(NULL) +
+  geom_line(data = c, mapping = aes(x =  as.POSIXct(date), y = dcases_dt))+
+  geom_line(data = b, mapping = aes(x =  as.POSIXct(date), y = hits*5000, color = keyword)) +
+  
+  scale_y_continuous(
+    
+    name = "Daily COVID cases",
+    
+    sec.axis = sec_axis(~.*.0002, name="Search Popularity")
+  )
+
+```
+
+```{r, fig.height=4}
+library(gtrendsR)
+a <- gtrends(c("ivermectin", "remdesevir", "hydroxychloroquine", "chloroquine"), time = "today+5-y", geo = c("US", "US", "US", "US"))
+
+b <- a$interest_over_time %>%
+  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = as.integer(hits)) %>%
+  filter(date >= as.Date("2019-10-01"))
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases))
+ggplot(NULL) +
+  geom_line(data = c, mapping = aes(x =  as.POSIXct(date), y = dcases_dt))+
+  geom_line(data = b, mapping = aes(x =  as.POSIXct(date), y = hits*5000, color = keyword)) +
+  
+  scale_y_continuous(
+    
+    name = "Daily COVID cases",
+    
+    sec.axis = sec_axis(~.*.0002, name="Search Popularity")
+  )
+
+
+```
+
+```{r, fig.height=6}
+library(gtrendsR)
+library(tidyquant)
+a <- gtrends(c("ivermectin for sale"), time = "today+5-y", geo = c("US"))
+
+b <- a$interest_over_time %>%
+  mutate(hits = replace(hits, hits == "<1", "0")) %>%
+  mutate(hits = as.integer(hits)) %>%
+  filter(date >= as.Date("2019-10-01"))
+
+num <- 3000
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases))
+  ggplot(NULL) +
+  geom_ma(
+    data = c, 
+    ma_fun = SMA, 
+    n = 7, 
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = dcases_dt, 
+      color = "Daily COVID cases",
+      linetype = "Daily COVID cases"
+    )) +
+  geom_line(
+    data = b, 
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = hits*num, 
+      color = "Search popularity",
+      linetype = "Search popularity"
+    )
+  ) +
+  scale_y_continuous(
+    name = "Daily COVID cases",
+    sec.axis = sec_axis(~.*1/num, name="Search Popularity")
+  ) +
+  labs(
+    x = "Date", 
+    y = "New COVID cases, 7-day rolling average",
+    title = 
+      "Google search popularity for 'Ivermectin for sale' and COVID cases"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(
+    name = "Data",
+    breaks = c("Search popularity", "Daily COVID cases"),
+    values = c(
+      "Search popularity" = "darkred", 
+      "Daily COVID cases" = "steelblue"
+    )) +
+  scale_linetype_manual(
+    name = "Data",
+    values = c(
+      "Search popularity" = 1, 
+      "Daily COVID cases" = 2
+    )
+  ) + 
+  guides(
+    fill = guide_legend(keywidth = 3, keyheight = 1), 
+    linetype = guide_legend(keywidth = 3, keyheight = 1)
+  )
+  
+ggsave("./images/ivermectin.png")
+```
+
+```{r, fig.height=3}
+library(gtrendsR)
+a <- gtrends(c("covid 5g"), time = "today+5-y", geo = c("US"))
+
+b <- a$interest_over_time %>%
+  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = as.integer(hits)) %>%
+  filter(date >= as.Date("2019-10-01"))
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases))
+ggplot(NULL) +
+  geom_line(data = c, mapping = aes(x =  as.POSIXct(date), y = dcases_dt))+
+  geom_line(data = b, mapping = aes(x =  as.POSIXct(date), y = hits*5000, color = keyword)) +
+  
+  scale_y_continuous(
+    
+    name = "Daily COVID cases",
+    
+    sec.axis = sec_axis(~.*.0002, name="Search Popularity")
+  ) +
+  theme_minimal() +
+  labs(x = "Date", title = "Searches for 'covid 5g' versus daily covid cases") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+```
+
+```{r}
+library(gtrendsR)
+a <- gtrends(c("ivermectin for sale"), time = "today+5-y", geo = c("US"))
+
+b <- a$interest_over_time %>%
+  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = as.integer(hits), date = as.POSIXct(date)) %>%
+  filter(date >= as.Date("2020-1-20")) %>%
+  group_by(week = week(date))
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases), date = as.POSIXct(date))
+
+d <- c %>%
+  group_by(week = week(date)) %>%
+  summarize(cases = sum(dcases_dt), date = date[4]) %>%
+  full_join(b, na.rm = TRUE, by = "week")
+
+d
+
+library(corrr)
+d %>%
+  summarize(cases = cases, hits = hits) %>%
+  correlate()
+
+
+d %>%
+  ggplot() +
+  geom_line(mapping = aes(x = week, y = cases)) + 
+  geom_line(mapping = aes(x = week, y = hits))
+
+
+
+```
+
+``` {}
+```
+
+```{r}
+library(gtrendsR)
+a <- gtrends(c("ivermectin for sale", "ivermectin"), time = "today+5-y", geo = c("US", "US"))
+
+b <- a$interest_over_time %>%
+  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = as.integer(hits), date = as.POSIXct(date)) %>%
+  filter(date >= as.Date("2020-1-20")) %>%
+  group_by(week = week(date), keyword = keyword)
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases), date = as.POSIXct(date))
+
+d <- c %>%
+  group_by(week = week(date)) %>%
+  summarize(cases = sum(dcases_dt), date = date[4]) %>%
+  full_join(b, na.rm = TRUE, by = "week")
+
+d
+
+# library(corrr)
+# d %>%
+#   group_by(keyword) %>%
+#   summarize(cases = cases, hits = hits) %>%
+#   correlate()
+
+```
+
+```{r}
+# map(~rownames_to_column(.x, var="measure1")) %>%
+#   # format each data set (r,P,n) long
+#   map(~pivot_longer(.x, -measure1, "measure2")) %>%
+#   # merge our three list elements by binding the rows
+#   bind_rows(.id = "id") %>%
+#   head() %>%
+#   kable()
+```
