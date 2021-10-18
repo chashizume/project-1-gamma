@@ -193,7 +193,7 @@ ggplot(NULL) +
 If we take that same data and overlay daily COVID cases, we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on, before there were almost any cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any increase during the major wave in the latter part of 2021.
 
 
-### Quality of Google Data
+#### Quality of Google Data
 
 The data from Google is aggregated over national searches and normalized by search volume and location to represent an average popularity for a specific term. Google does not publish data for all search queries, so in some cases it is necessary to use a related term or there may be no data at all. This scaling by relative proportions can often make it hard to understand the relative magnitude of searches as there is no real data which says how often a term is searched or what proportion of the population searched the term.
 
@@ -202,13 +202,23 @@ Google does preprocessing on this data to remove searches they suspect to be mac
 More generally, the data represents searches on Google so likely overcounts younger and more technology-connected populations and does not necessarily capture a representative proportion of the US public. Since Google provides no demographic information on the people who search for terms we do not know to what extent this skews the data.
 
 
+## Time series analysis
 
-- Observations here!
--   Explore the dataset with EDA techniques, document your observations. What is the quality of those data?
--   Comment on the quality of the data: How reputable is the source? How well-documented are their data-collection procedures? What potential errors might be in the data? What factors could contribute to missingness in the data?
+The data we consider here (cases, searches, vaccinations, etc.) are all time depedent and share a common time scale. Therefore it makes sense to start our analysis by looking at time dependent relationships between them. We decided to focus on two particular relationships: the effect of quarrantine on search trends and the correlation between misinformation and case load.
+
+### Start of pandemic graphs
+
+***TODO: Meagan and Claire***
+
+### Misinfomation graphs
+
+One of the most defining features of the past two years is the seemingly constant stream of new, creative, and utterly ridiculous home COVID remedies that keep popping up in the news. While to many these may seem like a crazy hoax, it is important to remember that their creation is often an act of desperation from people who feel like they have nowhere else to turn. We began studying the relationship between these searches and factors like cases, vaccinations, and deaths and found that while many terms show almost no correlation with these factors there are some important cases where they align. 
 
 
-What conclusions did you come to?
+## Abstracting away from time series
+
+### Correlation grpahs
+### Anything else
 
 ## Remaining Questions
 
