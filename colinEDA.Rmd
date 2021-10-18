@@ -499,6 +499,8 @@ c <- df_normalized %>%
     fill = guide_legend(keywidth = 3, keyheight = 1), 
     linetype = guide_legend(keywidth = 3, keyheight = 1)
   )
+  
+ggsave("./images/ivermectin.png")
 ```
 
 ```{r, fig.height=3}
@@ -527,7 +529,6 @@ ggplot(NULL) +
   theme_minimal() +
   labs(x = "Date", title = "Searches for 'covid 5g' versus daily covid cases") +
   theme(plot.title = element_text(hjust = 0.5)) 
-
 ```
 
 ```{r}
