@@ -100,22 +100,24 @@ glimpse(df_nyt_normalized)
 
 summary(df_nyt_normalized)
 ```
+
 ### Dataset observations
 
-The New York Times and the Census Bureau are very reputable sources. The NYT is sourcing their data from government and public health authorities, while the Census is notably conducted as a government means of tracking population data. 
+The New York Times and the Census Bureau are very reputable sources. The NYT is sourcing their data from government and public health authorities, while the Census is notably conducted as a government means of tracking population data.
 
 The current combined dataset has location, population, and time-based COVID case and death data. Based on the numbers shown through the `summarise()` function, we can see that the case and death counts are cumulative, not per day, as we may be used to when looking at NYT COVID charts.
 
 In detail, the following variables are in this combined dataset:
-- `date`: Date of reported cases and deaths
-- `county`: County
-- `state`: State
-- `fips`: FIPS code; unique to each county and state
-- `cases`: Number of cumulative cases
-- `deaths`: Number of cumulative deaths
-- `population`: Population of given county
-- `total_cases_per100k`: `cases` normalized for population size
-- `total_deaths_per100k`: `deaths` normalized for population size
+
+-   `date`: Date of reported cases and deaths
+-   `county`: County
+-   `state`: State
+-   `fips`: FIPS code; unique to each county and state
+-   `cases`: Number of cumulative cases
+-   `deaths`: Number of cumulative deaths
+-   `population`: Population of given county
+-   `total_cases_per100k`: `cases` normalized for population size
+-   `total_deaths_per100k`: `deaths` normalized for population size
 
 Like with any dataset, there are limitations. Since this data is reported and not automatically recorded by a sensor, per say, there's always room for undereporting, which is a [major concern](https://www.npr.org/2019/06/04/728034176/2020-census-could-lead-to-worst-undercount-of-black-latinx-people-in-30-years) when it comes to conducting the Census and using it to make legislative decisions [2]. There have been several moments in the last year and a half where the NYT had to update their data to fix double-counted cases, or when certain jurisdictions would report high numbers of cases or deaths after not reporting any for a few days [3]. Overall, though, the credibility of both datasets is clear, and these two sources are some of the best for using in our EDA. In short, the data isn't perfect, but it doesn't get much better than this for people-based data.
 
@@ -141,30 +143,32 @@ df_vax <- read_csv(filename_vax) %>%
 glimpse(df_vax)
 summary(df_vax)
 ```
+
 #### Dataset observations
 
 One reason we turned to the OWID dataset is because Google uses this data to create their in-house visuals related to COVID vaccinations, which spoke to the credibility of the data. For the scope of our project, we're more focused on the US, but this dataset does have international data. The per-capita values are calculated "based on the United Nations World Population Prospects", according to the OWID [site](https://ourworldindata.org/covid-vaccinations).
 
 In detail, the following variables are in this combined dataset:
-- `location`, `iso_code`: filtered to be "United States" and "US".
-- `date`: Date of reported vaccinations
-- `total_vaccinations`: number of doses delivered. For vaccines that require multiple doses, each individual dose is counted
-- `people_vaccinated`: total number of people vaccinated
-- `people_fully_vaccinated`: total number of people fully vaccinated (1 J&J, 2 Moderna/Pfizer)
-- `total_boosters`: total number of booster shots injected
-- `daily_vaccinations_raw`: daily change in the total number of doses administered; it is only calculated for consecutive days. This is a raw measure provided for data checks and transparency; OWID recommends using `daily_vaccinations` instead
-- `daily_vaccinations`: new doses administered per day (7-day smoothed)
-- `total_vaccinations_per_hundred`: `total_vaccinations` per 100 people in total population of the country
-- `people_vaccinated_per_hundred`: `people_vaccinated` per 100 people in total population of the country
-- `people_fully_vaccinated_per_hundred`: `people_fully_vaccinated` per 100 people in total population of the country
-- `total_boosters_per_hundred`: `total_boosters` per 100 people in total population of the country
-- `daily_vaccinations_per_million`: `daily_vaccinations` per one million people in total population of the country    
+
+-   `location`, `iso_code`: filtered to be "United States" and "US".
+-   `date`: Date of reported vaccinations
+-   `total_vaccinations`: number of doses delivered. For vaccines that require multiple doses, each individual dose is counted
+-   `people_vaccinated`: total number of people vaccinated
+-   `people_fully_vaccinated`: total number of people fully vaccinated (1 J&J, 2 Moderna/Pfizer)
+-   `total_boosters`: total number of booster shots injected
+-   `daily_vaccinations_raw`: daily change in the total number of doses administered; it is only calculated for consecutive days. This is a raw measure provided for data checks and transparency; OWID recommends using `daily_vaccinations` instead
+-   `daily_vaccinations`: new doses administered per day (7-day smoothed)
+-   `total_vaccinations_per_hundred`: `total_vaccinations` per 100 people in total population of the country
+-   `people_vaccinated_per_hundred`: `people_vaccinated` per 100 people in total population of the country
+-   `people_fully_vaccinated_per_hundred`: `people_fully_vaccinated` per 100 people in total population of the country
+-   `total_boosters_per_hundred`: `total_boosters` per 100 people in total population of the country
+-   `daily_vaccinations_per_million`: `daily_vaccinations` per one million people in total population of the country
 
 Like with the COVID case and death data, we can assume there are going to be several days where vaccination numbers are not going to be reported, especially if many places don't distribute vaccinations on certain weekends or holidays. This could offer one explanation for the many NAs prevalent in this dataset. Because this data is likely reported from places that are actively distributing vaccines, we can assume minimal error with the exception of human miscounting. Unlike with the Census data, people who are getting vaccinated will have had to come into contact with some sort of healthcare professional in order to receive the vaccine, at which point they will likely get recorded. I think data reliability becomes more of an issue where the vaccine rollout infrastructure isn't as defined, and where vaccines are scarcer, which may be more of the case in developing countries or countries with low access to vaccines.
 
 ### Google Trends Data
 
-We began by extracting data from Google trends and converting into a format which is useful for us. The data comes in as a  list of dataframes which describe the time-dependent, location-dependent, and related searches to the given queries. We begin by extracting the time-dependent data, replacing the "<1" elements with 0 so it can be converted to a numeric type, and selecting a data range we want to look at. We can then plot the popularity of searches over time.
+We began by extracting data from Google trends and converting into a format which is useful for us. The data comes in as a list of dataframes which describe the time-dependent, location-dependent, and related searches to the given queries. We begin by extracting the time-dependent data, replacing the "\<1" elements with 0 so it can be converted to a numeric type, and selecting a data range we want to look at. We can then plot the popularity of searches over time.
 
 ```{r}
 # Search for "covid"-esque search popularity
@@ -211,8 +215,8 @@ ggplot() +
     sec.axis = sec_axis(~.*1/3000, name="Search Popularity")
   )
 ```
-If we take that same data and overlay daily COVID cases, we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on, before there were almost any cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any increase during the major wave in the latter part of 2021.
 
+If we take that same data and overlay daily COVID cases, we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on, before there were almost any cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any increase during the major wave in the latter part of 2021.
 
 #### Quality of Google Data
 
@@ -221,7 +225,6 @@ The data from Google is aggregated over national searches and normalized by sear
 Google does preprocessing on this data to remove searches they suspect to be machine generated or made intentionally to affect their numbers. While we assume that this is done in a fair and unbiased manner we have now way of verifying their process as they do not disclose which specific steps they take. While this may be of concern for terms that are more likely to be spammed (election results, polling data) it likely has little if any effect for the terms we consider here.
 
 More generally, the data represents searches on Google so likely overcounts younger and more technology-connected populations and does not necessarily capture a representative proportion of the US public. Since Google provides no demographic information on the people who search for terms we do not know to what extent this skews the data.
-
 
 ## Time series analysis
 
@@ -233,18 +236,166 @@ The data we consider here (cases, searches, vaccinations, etc.) are all time dep
 
 ### Misinfomation graphs
 
-One of the most defining features of the past two years is the seemingly constant stream of new, creative, and utterly ridiculous home COVID remedies that keep popping up in the news. While to many these may seem like a crazy hoax, it is important to remember that their creation is often an act of desperation from people who feel like they have nowhere else to turn. We began studying the relationship between these searches and factors like cases, vaccinations, and deaths and found that while many terms show almost no correlation with these factors there are some important cases where they align. 
+One of the most defining features of the past two years is the seemingly constant stream of new, creative, and utterly ridiculous home COVID remedies that keep popping up in the news. While to many these may seem like a crazy hoax, it is important to remember that their creation is often an act of desperation from people who feel like they have nowhere else to turn. We began studying the relationship between these searches and factors like cases, vaccinations, and deaths and found that while many terms show almost no correlation with these factors there are some important cases where they align.
+
+#### COVID home remedies
+
+We chose to focus on what we identified as the four most popular medications that were falsely pitched as COVID remedies: ivermectin, remdesevir, hydroxychloroquine, and chloroquine. Each of these four were publicized enough to have sustained high search volume. If we look at the number of searches for each of these versus daily COVID cases we find that each has very distinct spikes at different points in the pandemic.
+
+```{r}
+a <- gtrends(c("ivermectin", "remdesevir", "hydroxychloroquine", "chloroquine"), time = "today+5-y", geo = c("US", "US", "US", "US"))
+
+b <- a$interest_over_time %>%
+  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = as.integer(hits)) %>%
+  filter(date >= as.Date("2019-10-01"))
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases))
+ggplot(NULL) +
+  geom_line(data = c, mapping = aes(x =  as.POSIXct(date), y = dcases_dt))+
+  geom_line(data = b, mapping = aes(x =  as.POSIXct(date), y = hits*5000, color = keyword)) +
+  
+  scale_y_continuous(
+    
+    name = "Daily COVID cases",
+    
+    sec.axis = sec_axis(~.*.0002, name="Search Popularity")
+  ) +
+  labs(
+    x = "Date", 
+    y = "New COVID cases, 7-day rolling average",
+    title = 
+      "Google search popularity for four medications and COVID cases"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+
+
+  guides(
+    fill = guide_legend(keywidth = 3, keyheight = 1), 
+    linetype = guide_legend(keywidth = 3, keyheight = 1)
+  )
+```
+
+Many of these spikes were driven by media attention that was often started by tweets or speeches from prominent political figures. For example, former president Donald Trump first [tweeted about hydroxychloroquine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7685699/) on the same day (March 21, 2020) as the first major spike in searches for the term[4].
+
+We were also conscious that many searches for misinformation that are linked to tweets or news articles may not represent any belief in or intention to partake in the topic. For this reason we attempted to choose search terms that were more likely to imply belief or intent than idle curiosity. When we dig down on some of these terms we find that they tend to follow a slightly different pattern.
+
+```{r}
+library(tidyquant)
+a <- gtrends(c("ivermectin for sale"), time = "today+5-y", geo = c("US"))
+
+b <- a$interest_over_time %>%
+  mutate(hits = replace(hits, hits == "<1", "0")) %>%
+  mutate(hits = as.integer(hits)) %>%
+  filter(date >= as.Date("2019-10-01"))
+
+num <- 3000
+
+c <- df_normalized %>%
+  group_by(date) %>%
+  summarize(cases = sum(cases)) %>%
+  mutate(dcases_dt = cases - lag(cases))
+  ggplot(NULL) +
+  geom_ma(
+    data = c, 
+    ma_fun = SMA, 
+    n = 7, 
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = dcases_dt, 
+      color = "Daily COVID cases",
+      linetype = "Daily COVID cases"
+    )) +
+  geom_line(
+    data = b, 
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = hits*num, 
+      color = "Search popularity",
+      linetype = "Search popularity"
+    )
+  ) +
+  scale_y_continuous(
+    name = "Daily COVID cases",
+    sec.axis = sec_axis(~.*1/num, name="Search Popularity")
+  ) +
+  labs(
+    x = "Date", 
+    y = "New COVID cases, 7-day rolling average",
+    title = 
+      "Google search popularity for 'Ivermectin for sale' and COVID cases"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(
+    name = "Data",
+    breaks = c("Search popularity", "Daily COVID cases"),
+    values = c(
+      "Search popularity" = "darkred", 
+      "Daily COVID cases" = "steelblue"
+    )) +
+  scale_linetype_manual(
+    name = "Data",
+    values = c(
+      "Search popularity" = 1, 
+      "Daily COVID cases" = 2
+    )
+  ) + 
+  guides(
+    fill = guide_legend(keywidth = 3, keyheight = 1), 
+    linetype = guide_legend(keywidth = 3, keyheight = 1)
+  )
+```
+NOTE: COVID data has been smoothed with a 7-day moving average to account for weekly inaccuracies due to test numbers decreasing on weekends.
+
+In this case we look at the search term "ivermectin for sale" which we believe is likely to be more closely linked with intention to buy and use the drug than a search for "ivermectin". When we look at this in relation to daily COVID cases we see that after about the third quarter of 2020 the two become highly correlated. As cases increased in the early and middle parts of 2021 searches also rose and as cases fell in the summer searches did as well. This close linking with COVID numbers suggests there is likely an explanation beyond news coverage that accounts for the search volume.
+
+#### Vaccine Misinformation
+
+The other prominent form of misinformation we wanted to tackle was the discourse around vaccines and their hypothetical, if sometimes absurd, side effects. While vaccinations did not begin in earnest until the beginning of 2021, misinformation about them was spreading since the early days of the pandemic.
+
+```{r}
+
+covid_5g <- gtrends(
+  c("vaccine 5g"), 
+  geo = c("US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+covid_5g <- covid_5g$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+scale_factor <- max(df_vax$daily_vaccinations) / max(covid_5g$hits)
+
+
+ggplot() +
+  geom_line(data = df_vax, aes(x = date, y = daily_vaccinations, color = "Daily Vaccinations", linetype = "Daily Vaccinations")) +
+  geom_ma(data = covid_5g, ma_fun = SMA, n = 2, mapping = aes(x = date, y = hits * scale_factor, color = "Search popularity", linetype = "Search popularity")) +
+  scale_y_continuous(name="Daily Vaccinations in the US", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search")) +
+  labs(
+    x = "Date", 
+    y = "New COVID cases, 7-day rolling average",
+    title = 
+      "Google search popularity for 'vaccine 5g' and daily vaccinations"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+```
 
 
 ## Abstracting away from time series
 
 ### Correlation grpahs
+
 ### Anything else
 
 ## Remaining Questions
 
 What questions do you have remaining?
-
 
 <!-- -------------------------------------------------- -->
 
@@ -254,3 +405,4 @@ What questions do you have remaining?
 
 [3] The New York Times also added an [FAQ section](https://www.nytimes.com/interactive/2020/us/about-coronavirus-data-maps.html) to help explain the dataset.
 
+[4] Impact of Trump's Promotion of Unproven COVID-19 Treatments and Subsequent Internet Trends. [Trump tweeted about hydroxychloroquine the same day it saw its first major spike in searches](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7685699/)
