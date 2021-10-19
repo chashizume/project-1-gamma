@@ -77,7 +77,7 @@ df_covid <- df_covid %>%
   left_join(df_pop, "fips")
 
 ## Isolate specific columns
-df_data <-
+df_nyt_data <-
   df_covid %>%
   select(
     date,
@@ -90,15 +90,15 @@ df_data <-
   )
 
 ## Calculate case and death rates per 100k people
-df_normalized <- df_data %>%
+df_nyt_normalized <- df_nyt_data %>%
   mutate(
     total_cases_per100k = cases / population * 100000,
     total_deaths_per100k = deaths / population * 100000
   )
 
-glimpse(df_normalized)
+glimpse(df_nyt_normalized)
 
-summary(df_normalized)
+summary(df_nyt_normalized)
 ```
 ### Dataset observations
 
@@ -167,39 +167,49 @@ Like with the COVID case and death data, we can assume there are going to be sev
 We began by extracting data from Google trends and converting into a format which is useful for us. The data comes in as a  list of dataframes which describe the time-dependent, location-dependent, and related searches to the given queries. We begin by extracting the time-dependent data, replacing the "<1" elements with 0 so it can be converted to a numeric type, and selecting a data range we want to look at. We can then plot the popularity of searches over time.
 
 ```{r}
-
-a <- gtrends(c("covid", "coronavirus", "covid-19", "covid 19"), time = "today+5-y", geo = c("US", "US", "US", "US"))
-b <- a$interest_over_time %>%
-  mutate(hits=replace(hits, hits=="<1", "0")) %>%
+# Search for "covid"-esque search popularity
+df_covid_gtrends <- gtrends(
+  c("covid", "coronavirus", "covid-19", "covid 19"), 
+  time = "today+5-y", 
+  geo = c("US", "US", "US", "US")
+)$interest_over_time %>%
+  mutate(hits = replace(hits, hits=="<1", "0")) %>%
   mutate(hits = as.integer(hits)) %>%
   filter(date >= as.Date("2019-10-01"))
 
-b %>%
+df_covid_gtrends %>%
   ggplot() +
-  geom_line(mapping = aes(x =  as.POSIXct(date), y = hits, color = keyword)) +
-  labs(x = "Date", y = "Hits", title = "Relative hits for several search queries")
+  geom_line(
+    mapping = aes(x = as.POSIXct(date), y = hits, color = keyword)
+  ) +
+  labs(
+    x = "Date", 
+    y = "Hits", 
+    title = "Relative hits for several search queries"
+  )
 ```
+
 Graphs like this can tell us what people were searching for at any particular time, like the above example which shows the term "coronavirus" jumping then dropping dramatically as it was replaced with other terms. However, this data alone does not really tell us much about COVID without including more information.
 
 ```{r}
-# a <- gtrends(c("covid", "coronavirus", "covid-19", "covid 19"), time = "today+5-y", geo = c("US", "US", "US", "US"))
-# b <- a$interest_over_time %>%
-#   mutate(hits=replace(hits, hits=="<1", "0")) %>%
-#   mutate(hits = as.integer(hits)) %>%
-#   filter(date >= as.Date("2019-10-01"))
 
-c <- df_normalized %>%
+df_nyt_national <- df_nyt_normalized %>%
   group_by(date) %>%
   summarize(cases = sum(cases)) %>%
   mutate(dcases_dt = cases - lag(cases))
-ggplot(NULL) +
-  geom_line(data = c, mapping = aes(x =  as.POSIXct(date), y = dcases_dt))+
-  geom_line(data = b, mapping = aes(x =  as.POSIXct(date), y = hits*3000, color = keyword)) +
-  
+
+
+ggplot() +
+  geom_line(
+    data = df_nyt_national, 
+    mapping = aes(x =  as.POSIXct(date), y = dcases_dt)
+  ) +
+  geom_line(
+    data = df_covid_gtrends, 
+    mapping = aes(x =  as.POSIXct(date), y = hits*3000, color = keyword)
+  ) +
   scale_y_continuous(
-    
     name = "Daily COVID cases",
-    
     sec.axis = sec_axis(~.*1/3000, name="Search Popularity")
   )
 
