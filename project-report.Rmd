@@ -449,13 +449,23 @@ theme(plot.title = element_text(hjust = 0.5))
 The term 'vaccine 5g' was trending as early as March 15, as US COVID numbers were just starting to increase, and months before any viable vaccine was in human trials. This increase was likely related to news coverage on the topic which began as early as [May 18 ](https://maldita.es/malditaciencia/20200518/post-facebook-coronavirus-vacunas-chemtrails-5g/) but increased in early March [5]. The BBC did an analysis of [social media posts related to the topic](https://www.bbc.com/news/53191523) and found that they had substantial reach across the globe [6]. In this case it is actually interesting to note that searches do not seem to be well correlated with vaccination rates but rather with critical events in the vaccination timeline. We see a spike at the very beginning of the pandemic, a spike as large-scale vaccinations begin, and a few more spikes as vaccinations increase then taper off. Not all of the trends in searches can be explained by these events but they do seem to overlap with many of them.
 ## Abstracting away from time series
 
+Until now we have focused our analysis on showing trends between variables over time which can provide a picture of how data might relate to one another. In order to define this process mathematically we can calculate the correlation between two variables with respect to time. While this method is still implicitly time-based, it can give us a clearer picture of the relationship between many variables instead of just a few.
+
 ### Correlation graphs
+
+We calculated the time-synchronized correlation between a number of search terms and common pandemic metric such as cases, deaths, and vaccinations. While many of these factors have little correlation, some stand out as being much more tightly coupled.
+
+*** insert graph here ***
+
+If we look at the above graph we see many relationships we would expect. Cases and deaths show a strong positive correlation while cases and vaccinations show a strong negative correlation. We also see some interesting correlations between search queries and pandemic metrics. Vaccine death, vaccine microchip, vaccine causes covid, and vaccine 5g are all positively correlated with cases and deaths, but also with daily vaccinations. This positive correlation between so many variables likely implies that there are underlying factors either in people's behavior or simply in the progression of the pandemic that confound our study of their dependence. For this reason we can not make any comment as to the causality in either direction between pandemic variables and search terms.
 
 ### Anything else
 
 ## Remaining Questions
 
-What questions do you have remaining?
+1. How do these variables compare if we do cross-correlation? That is, do the variables show higher correlation when offset by a certain number of days and do these correlations tell us something about the underlying behavior of people during the pandemic?
+
+2. What are the possible confounding factors that might skew our understanding of the relationship between these variables? What causes people to search for things when and how they do and what factors might affect this behavior? This is closely related with the piranha problem presented in [Tosh et. al](http://www.stat.columbia.edu/~gelman/research/unpublished/piranhas.pdf) where a large number of explanatory variables compete to affect some result.
 
 <!-- -------------------------------------------------- -->
 
@@ -470,3 +480,5 @@ What questions do you have remaining?
 [5] News coverage of vaccine and 5g misinformation existed as early as [May 18, 2020 ](https://maldita.es/malditaciencia/20200518/post-facebook-coronavirus-vacunas-chemtrails-5g/)
 
 [6]BBC analysis of [social media posts related to vaccine 5g](https://www.bbc.com/news/53191523)
+
+[7] [The piranha problem: Large effects swimming in a small pond, Tosh et. al](http://www.stat.columbia.edu/~gelman/research/unpublished/piranhas.pdf)
