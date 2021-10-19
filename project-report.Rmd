@@ -465,7 +465,14 @@ If we look at the above graph we see many relationships we would expect. Cases a
 
 1. How do these variables compare if we do cross-correlation? That is, do the variables show higher correlation when offset by a certain number of days and do these correlations tell us something about the underlying behavior of people during the pandemic?
 
-2. What are the possible confounding factors that might skew our understanding of the relationship between these variables? What causes people to search for things when and how they do and what factors might affect this behavior? This is closely related with the piranha problem presented in [Tosh et. al](http://www.stat.columbia.edu/~gelman/research/unpublished/piranhas.pdf) where a large number of explanatory variables compete to affect some result.
+2. What are the possible confounding factors that might skew our understanding of the relationship between these variables? What causes people to search for things when and how they do and what factors might affect this behavior? This is closely related with the piranha problem presented in [Tosh et. al](http://www.stat.columbia.edu/~gelman/research/unpublished/piranhas.pdf) where a large number of explanatory variables "compete" to affect some result.
+
+3. Is there enough evidence to suggest a causal relationship between people who believe or partake in pandemic-related misinformation and the search volume for a particular topic? Can we say anything about the number or demographics of people who believe in these things based on their search data alone, and is there other data that could be combined to provide more insight?
+
+4. To what extent is media attention on a topic responsible for increased search volumes and to what extent is media attention a result of increased searches? We have seen several circumstances where news articles seem to cause a spike in searches but we have little evidence to show how this spike affects the search volume longer-term.
+
+5. News articles about misinformation seem to cause spikes in searches on the topic and on topics that seem to suggest intent to act on this misinformation. To what extent does the media spreading information on misinformation, even if they are reporting on its falseness, actually increase the number of people who are exposed to or believe some lie? Is giving these stories widespread media coverage helpful or harmful in the effort to protect people from harming themselves or others?
+
 
 <!-- -------------------------------------------------- -->
 
