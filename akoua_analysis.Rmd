@@ -1,0 +1,287 @@
+---
+title: "Akoua COVID EDA"
+author: "Akoua Orsot"
+date: 2021-10-19
+output:
+  github_document:
+    toc: true
+---
+
+This document covers Megan's EDA for the COVID-19 Project in Data Science F2021.
+
+```{r}
+library(tidyverse)
+library(gtrendsR)
+library(tidyquant)
+library(corrr)
+library(ggcorrplot)
+```
+
+```{r}
+physical_training_trends <- gtrends(
+  c(
+    "home workout", 
+    "home gym"
+    ), 
+  geo = c("US", "US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+physical_training_data <- 
+  physical_training_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+physical_training_data
+```
+
+```{r}
+
+shopping_trends <- gtrends(
+  c(
+    "delivery", 
+    "amazon"
+    ), 
+  geo = c("US", "US", "US", "US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+shopping_trends_data <- 
+  shopping_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+shopping_trends_data
+```
+
+```{r}
+
+financial_stocks_trends <- gtrends(
+  c(
+    "amazon stock", 
+    "robinhood stock",
+    "zoom stock"
+    ), 
+  geo = c("US", "US", "US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+financial_stocks_trends_data <- 
+  financial_stocks_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+financial_stocks_trends_data
+```
+
+```{r}
+df_pop <- read_csv(
+  "./data/ACSDT5Y2018.B01003_data_with_overlays_2021-10-05T112340.csv", 
+  skip = 1
+)
+
+## URL for the NYT covid-19 county-level data
+url_counties <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+filename_nyt <- "./data/nyt_counties.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_counties,
+        destfile = filename_nyt
+      )
+
+## Loads the downloaded csv
+df_covid <- read_csv(filename_nyt)
+
+df_pop <- df_pop %>%
+  mutate(fips = str_sub(id, -5))
+
+df_covid <- df_covid %>%
+  left_join(df_pop, "fips")
+
+df_data <-
+  df_covid %>%
+  select(
+    date,
+    county,
+    state,
+    fips,
+    cases,
+    deaths,
+    population = `Estimate!!Total`
+  )
+
+df_normalized <- df_data %>%
+  mutate(
+    total_cases_per100k = cases / population * 100000,
+    total_deaths_per100k = deaths / population * 100000
+  )
+
+df_normalized
+```
+
+```{r}
+df_national_data <- df_covid %>%
+  group_by(date) %>%
+  summarize(
+    total_cases = sum(cases, na.rm = TRUE),
+    total_deaths = sum(deaths, na.rm = TRUE)
+  ) %>%
+  mutate(
+    new_cases = total_cases - lag(total_cases),
+    new_cases = ifelse(is.na(new_cases), 0, new_cases),
+    new_deaths = total_deaths - lag(total_deaths),
+    new_deaths = ifelse(is.na(new_deaths), 0, new_deaths)
+  )
+
+tail(df_national_data)
+```
+
+```{r}
+physical_training_data <- 
+  physical_training_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+physical_training_data
+```
+
+```{r}
+scale_factor <- max(df_national_data$new_cases) / max(physical_training_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
+  geom_line(data = physical_training_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search")) +
+  ggtitle("COVID's effect on Workout Habits in the U.S")
+```
+
+```{r}
+scale_factor <- max(df_national_data$new_cases) / max(shopping_trends_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
+  geom_line(data = shopping_trends_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search")) +
+  ggtitle("COVID's effect on shopping Habits in the U.S")
+```
+
+```{r}
+scale_factor <- max(df_national_data$new_cases) / max(financial_stocks_trends_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
+  geom_line(data = financial_stocks_trends_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search")) +
+   ggtitle("COVID's effect on stock buys trends in the U.S")
+```
+
+```{r}
+## URL for the OWID vaccination data
+url_vax <- 
+  "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"
+filename_vax <- "./data/owid_vax.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_vax,
+        destfile = filename_vax
+      )
+
+## Loads the downloaded csv
+df_vax <- read_csv(filename_vax) %>%
+  filter(location == "United States") %>%
+  drop_na(daily_vaccinations)
+
+df_vax
+```
+
+```{r}
+travel <- gtrends(
+  c("travel", 
+    "trip", 
+    "flight", 
+    "airbnb", 
+    "kayak"
+    ), 
+  geo = c("US", "US", "US", "US", "US"), 
+  time = "2021-01-01 2021-10-01"
+  )
+
+travel_data <- travel$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+
+```
+
+```{r}
+socializing <- gtrends(
+  c( 
+    "restaurant near",  
+    "bar near"
+    ), 
+  geo = c("US", "US"), 
+  time = "2021-01-01 2021-10-01"
+  )
+
+socializing_data <- socializing$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+```
+
+```{r}
+
+outdoor <- gtrends(
+  c( "park", 
+    "outdoor"
+    ), 
+  geo = c("US", "US", "US", "US"), 
+  time = "2021-01-01 2021-10-01"
+  )
+
+outdoor_data <- outdoor$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+```
+
+```{r}
+scale_factor <- max(df_vax$daily_vaccinations) / max(travel_data$hits)
+
+ggplot() +
+  geom_line(data = df_vax, aes(x = date, y = daily_vaccinations)) +
+  geom_line(data = travel_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of Vaccinated People in US", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+
+```
+
+```{r}
+scale_factor <- max(df_vax$daily_vaccinations) / max(socializing_data$hits)
+
+ggplot() +
+  geom_line(data = df_vax, aes(x = date, y = daily_vaccinations)) +
+  geom_line(data =socializing_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of Vaccinated People in US", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+
+```
+
+```{r}
+scale_factor <- max(df_vax$daily_vaccinations) / max(outdoor_data$hits)
+
+ggplot() +
+  geom_line(data = df_vax, aes(x = date, y = daily_vaccinations)) +
+  geom_line(data =outdoor_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of Vaccinated People in US", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+
+```
