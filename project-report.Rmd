@@ -192,12 +192,10 @@ df_covid_gtrends %>%
 Graphs like this can tell us what people were searching for at any particular time, like the above example which shows the term "coronavirus" jumping then dropping dramatically as it was replaced with other terms. However, this data alone does not really tell us much about COVID without including more information.
 
 ```{r}
-
 df_nyt_national <- df_nyt_normalized %>%
   group_by(date) %>%
   summarize(cases = sum(cases)) %>%
   mutate(dcases_dt = cases - lag(cases))
-
 
 ggplot() +
   geom_line(
@@ -212,7 +210,6 @@ ggplot() +
     name = "Daily COVID cases",
     sec.axis = sec_axis(~.*1/3000, name="Search Popularity")
   )
-
 ```
 If we take that same data and overlay daily COVID cases, we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on, before there were almost any cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any increase during the major wave in the latter part of 2021.
 
