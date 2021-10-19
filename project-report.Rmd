@@ -228,7 +228,7 @@ More generally, the data represents searches on Google so likely overcounts youn
 
 ## Time series analysis
 
-The data we consider here (cases, searches, vaccinations, etc.) are all time depedent and share a common time scale. Therefore it makes sense to start our analysis by looking at time dependent relationships between them. We decided to focus on two particular relationships: the effect of quarrantine on search trends and the correlation between misinformation and case load.
+The data we consider here (cases, searches, vaccinations, etc.) are all time dependent and share a common time scale. Therefore it makes sense to start our analysis by looking at time dependent relationships between them. We decided to focus on two particular relationships: the effect of quarantine on search trends and the correlation between misinformation and case load.
 
 ### Start of pandemic graphs
 
@@ -236,7 +236,7 @@ The data we consider here (cases, searches, vaccinations, etc.) are all time dep
 
 ### Misinfomation graphs
 
-One of the most defining features of the past two years is the seemingly constant stream of new, creative, and utterly ridiculous home COVID remedies that keep popping up in the news. While to many these may seem like a crazy hoax, it is important to remember that their creation is often an act of desperation from people who feel like they have nowhere else to turn. We began studying the relationship between these searches and factors like cases, vaccinations, and deaths and found that while many terms show almost no correlation with these factors there are some important cases where they align.
+One of the most defining features of the past two years is the seemingly constant stream of new, creative, and utterly ridiculous home COVID remedies that keep popping up in the news. While to many these may seem crazy, misinformation can be powerful, dangerous, and ultimately harmful when individuals strongly believe it. We began studying the relationship between these searches and factors like cases, vaccinations, and deaths and found that while many terms show almost no correlation with these factors there are some important cases where they align.
 
 #### COVID home remedies
 
