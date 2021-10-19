@@ -235,9 +235,47 @@ The data we consider here (cases, searches, vaccinations, etc.) are all time dep
 
 ***TODO: Meagan and Claire***
 
-### Pandemic-related search terms
+### Financial Decisions during the Pandemic
 
 ***TODO: Akoua***
+
+```{r}
+financial_stocks_trends <- gtrends(
+  c(
+    "amazon stock", 
+    "robinhood stock",
+    "zoom stock"
+    ), 
+  geo = c("US", "US", "US"), 
+  time = "2020-03-01 2021-10-01"
+  )
+
+financial_stocks_trends_data <- 
+  financial_stocks_trends$interest_over_time %>%
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+financial_stocks_trends_data
+
+```
+
+```{r}
+scale_factor <- max(df_national_data$new_cases) / max(financial_stocks_trends_data$hits)
+
+ggplot() +
+  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
+  geom_line(data = financial_stocks_trends_data, aes(x = date, y = hits * scale_factor, color = keyword)) +
+  scale_y_continuous(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search")) +
+   ggtitle("COVID's effect on stock buys trends in the U.S")
+
+```
+
+-   Consumer spending going down --\> savings
+
+-   Interest in the stock market increase --\> people opening up more Robinhood accounts
+
+-   Online shopping, Business Cloud services --\> Amazon stock searches
 
 ### Misinfomation graphs
 
@@ -351,6 +389,7 @@ guides(
   linetype = guide_legend(keywidth = 3, keyheight = 1)
 )
 ```
+
 NOTE: COVID data has been smoothed with a 7-day moving average to account for weekly inaccuracies due to test numbers decreasing on weekends.
 
 In this case we look at the search term "ivermectin for sale" which we believe is likely to be more closely linked with intention to buy and use the drug than a search for "ivermectin". When we look at this in relation to daily COVID cases we see that after about the third quarter of 2020 the two become highly correlated. As cases increased in the early and middle parts of 2021 searches also rose and as cases fell in the summer searches did as well. This close linking with COVID numbers suggests there is likely an explanation beyond news coverage that accounts for the search volume.
@@ -406,7 +445,6 @@ labs(
 ) +
 theme(plot.title = element_text(hjust = 0.5))
 ```
-
 
 ## Abstracting away from time series
 
