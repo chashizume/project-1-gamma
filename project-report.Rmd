@@ -448,7 +448,7 @@ theme(plot.title = element_text(hjust = 0.5))
 
 ## Abstracting away from time series
 
-### Correlation grpahs
+### Correlation graphs
 
 ### Anything else
 
