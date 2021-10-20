@@ -235,24 +235,23 @@ More generally, the data represents searches on Google so likely overcounts youn
 
 ## Time series analysis
 
-The data we consider here (cases, searches, vaccinations, etc.) are all time dependent and share a common time scale. Therefore it makes sense to start our analysis by looking at time dependent relationships between them. We decided to focus on two particular relationships: the effect of quarantine on search trends and the correlation between misinformation and case load.
+The data we consider here (cases, searches, vaccinations, etc.) are all time dependent and share a common time scale. Therefore it makes sense to start our analysis by looking at time dependent relationships between them. We decided to focus on three particular relationships: the effect of quarantine on search trends, relationships between COVID and stock interest, and the correlation between misinformation and case load.
 
 ### Start of pandemic graphs
 
-At the beginning of the Covid 19 pandemic, the world underwent unprecedented changes, as lockdowns took over, borders closed, and many people transitioned to working from home. This dynamic produced some unexpected phenomenon adjacent to that of the Covid 19 virus. Using the same method described above we tracked some of the popular google searches from March to June, the first couple months of the shutdowns in the US, to see how the pandemic affected our society through lockdowns and shortages. At the start of looking into this topic, we created a list of cultural moments for the pandemic, from Tiger King to Sourdough Bread, and then narrowed our list down to five searches: Animal Crossing, Dalgona Coffee, Toilet paper, Tiger King, and TikTok. We felt that each item on the list had an impact on society during the early pandemic, and wanted to explore it further. 
+At the beginning of the Covid 19 pandemic, the world underwent unprecedented changes, as lockdowns took over, borders closed, and many people transitioned to working from home. This dynamic produced some unexpected phenomenon adjacent to that of the Covid 19 virus. Using the same method described above we tracked some of the popular google searches from March to June, the first couple months of the shutdowns in the US, to see how the pandemic affected our society through lockdowns and shortages. At the start of looking into this topic, we created a list of cultural moments for the pandemic, from Tiger King to Sourdough Bread, and then narrowed our list down to five searches: Animal Crossing, Dalgona Coffee, Toilet paper, Tiger King, and TikTok. We felt that each item on the list had an impact on society during the early pandemic, and wanted to explore it further.
 
-Animal Crossing: A New Horizon launched in March of 2020 just as lockdown became widespread. It quickly became a phenomenon with a New York Times article stating that “With the world in the grip of a pandemic, the … game is a conveniently timed piece of whimsy” [18]. It was a roaring success “selling more digital copies - five million - in a single month than any other console game in history.” [19]. 
+Animal Crossing: A New Horizon launched in March of 2020 just as lockdown became widespread. It quickly became a phenomenon with a New York Times article stating that "With the world in the grip of a pandemic, the … game is a conveniently timed piece of whimsy" [18]. It was a roaring success "selling more digital copies - five million - in a single month than any other console game in history." [19].
 
-Dalgona Coffee became a TikTok sensation in the early days of the pandemic, becoming “the most searched type of coffee worldwide” [17]. Katherin Kirkwood commented in her article “What Is Dalgona Coffee” that she felt “the Dalgona coffee craze has everything to do with our current COVID-19 induced isolation” and was a way to make cafe-style coffee with at-home ingredients [13]. She attributed the rise in Dalgona Coffee`s popularity to the lockdowns and the visually appealing aesthetic it offered while at home, in other words, its “instagrammability”. 
+Dalgona Coffee became a TikTok sensation in the early days of the pandemic, becoming "the most searched type of coffee worldwide" [17]. Katherin Kirkwood commented in her article "What Is Dalgona Coffee" that she felt "the Dalgona coffee craze has everything to do with our current COVID-19 induced isolation" and was a way to make cafe-style coffee with at-home ingredients [13]. She attributed the rise in Dalgona Coffee\`s popularity to the lockdowns and the visually appealing aesthetic it offered while at home, in other words, its "instagrammability".
 
-The toilet paper shortage was one of the first major effects covid 19 had on the world’s supply change, and was a major sign that the pandemic was going to affect people’s daily lives. According to Dr. Ronalds Gonzalez, the shortage was not so much due to supply chain failure, as later shortages would be, but more the panic buying consumer showed, which was a reflection of the effect covid had on the community. It was reported that “Nearly half of all grocery stores in the United States were out of stock of toilet paper for some part of the day on April 19” [16].
+The toilet paper shortage was one of the first major effects covid 19 had on the world's supply change, and was a major sign that the pandemic was going to affect people's daily lives. According to Dr. Ronalds Gonzalez, the shortage was not so much due to supply chain failure, as later shortages would be, but more the panic buying consumer showed, which was a reflection of the effect covid had on the community. It was reported that "Nearly half of all grocery stores in the United States were out of stock of toilet paper for some part of the day on April 19" [16].
 
-Our third search term, Tiger King, was launched on Netflix on March 20th, and was watched by “34.3 million unique viewers in the US … in its first 10 days of release”[15]. In a USA Today article, it was stated that despite the controversial message the documentary conveys, “it has given many a collective sense of community during a time when they are in self-isolation” [14]. It’s important to note the sense of community given by the mass cult following of the show and how it connected people even though this highly stressful and polarized time.
+Our third search term, Tiger King, was launched on Netflix on March 20th, and was watched by "34.3 million unique viewers in the US … in its first 10 days of release"[15]. In a USA Today article, it was stated that despite the controversial message the documentary conveys, "it has given many a collective sense of community during a time when they are in self-isolation" [14]. It's important to note the sense of community given by the mass cult following of the show and how it connected people even though this highly stressful and polarized time.
 
-During the coronavirus (COVID-19) pandemic, TikTok saw a 180 percent increase in use [13]. Kenneth Goldsmith, author of Wasting Time on the Internet, sees TikTok’s popularity as a natural reaction to the oppressive mania of a global lockdown – it is a pressure valve for people cooped up indoors. ‘The only response to an existential situation is absurdity and humor,’ Goldsmith says. ‘It brings us back to the darker side of surrealism.”’[12]. He claims that this absurdity is seen in popular TikToks, and the way that popular content lacks the perfection valued on other social media such as Instagram  made it the perfect app for people stuck at home in an unperfect world- it was raw and real and what special teens needed during isolation [13]
+During the coronavirus (COVID-19) pandemic, TikTok saw a 180 percent increase in use [13]. Kenneth Goldsmith, author of Wasting Time on the Internet, sees TikTok's popularity as a natural reaction to the oppressive mania of a global lockdown – it is a pressure valve for people cooped up indoors. 'The only response to an existential situation is absurdity and humor,' Goldsmith says. 'It brings us back to the darker side of surrealism."'[12]. He claims that this absurdity is seen in popular TikToks, and the way that popular content lacks the perfection valued on other social media such as Instagram made it the perfect app for people stuck at home in an unperfect world- it was raw and real and what special teens needed during isolation [13]
 
 To look at the effect of quarantine on the above search trends, we looked at the time period of March 1st to June 1st of 2020.
-
 
 ```{r}
 df_startofcovid_gtrends <- 
@@ -292,8 +291,8 @@ geom_line(
   values = c("blue", "black", "purple", "orange", "red", "green")) +
   theme(legend.title = element_blank())
 ```
-What we see in our graph largely follows both the data above and our lived experience. We see a spike in Tiger King and Animal Crossing as lock downs take over with cases soaring and declining as cases do and our attention spans drop. We also see searches for Toilet paper spiking and then dropping as panic buying stops and the supply chain adapts. We are able to see how Dalgona Coffee`s search popularity grew and dropped off, as well as seeing how searches for TiKToK have continued to grow consistently through the first months of the pandemic. Though we do not track all the search trends throughout the entire pandemic or include all the trends that Google Searches picked up, we were able to plot some of the notable cultural moments in the early days of the pandemic seeing how, as a culture, we were adapting as covid case numbers changed.
 
+What we see in our graph largely follows both the data above and our lived experience. We see a spike in Tiger King and Animal Crossing as lock downs take over with cases soaring and declining as cases do and our attention spans drop. We also see searches for Toilet paper spiking and then dropping as panic buying stops and the supply chain adapts. We are able to see how Dalgona Coffee\`s search popularity grew and dropped off, as well as seeing how searches for TiKToK have continued to grow consistently through the first months of the pandemic. Though we do not track all the search trends throughout the entire pandemic or include all the trends that Google Searches picked up, we were able to plot some of the notable cultural moments in the early days of the pandemic seeing how, as a culture, we were adapting as covid case numbers changed.
 
 ```{r}
 animal_crossing <-
@@ -324,12 +323,12 @@ ggplot() +
   sec.axis = sec_axis(~.*1/scale_factor, name="Search Popularity")
   )
 ```
+
 Looking closer at a 2-week section of Animal crossing data vs Covid cases, we see an interesting trend. We are not sure the reasoning for it, but found it interesting and wanted to point it out. In the graph seen above, we see that when the number of cases spikes, searches for Animal Crossing are at a low point. One theory we have is that the extreme points occurred on weekends when people have more time to play games and covid cases were not counted. We would have to explore deeper to know for sure, but nonetheless, we found the data interesting.
 
 ### Financial Decisions during the Pandemic
 
-During the past two years or so, the COVID-19 pandemic has been quite devastating for people all across the country in terms of health, job loss, and other risks onto their livelihood. However, we observed growth in other socio-economic metrics like the saving rate soaring at 33.7% in April
-2020 [8]. Having more disposable income paired with the stimulus checks garnered interest in the stock markets lead all three key indexes (S&P500, NASDAQ, Dow Jones) up in the Q4 2020 and Q1 2021 average an increase of 17-27% [9]. In that regard, we wanted to examine if certain key search terms capture this new found enthusiasm for the average American for the stock market.
+During the past two years or so, the COVID-19 pandemic has been quite devastating for people all across the country in terms of health, job loss, and other risks onto their livelihood. However, we observed growth in other socio-economic metrics like the saving rate soaring at 33.7% in April 2020 [8]. Having more disposable income paired with the stimulus checks garnered interest in the stock markets lead all three key indexes (S&P500, NASDAQ, Dow Jones) up in the Q4 2020 and Q1 2021 average an increase of 17-27% [9]. In that regard, we wanted to examine if certain key search terms capture this new found enthusiasm for the average American for the stock market.
 
 P.S: Reminder that we are working with aggregated data of searches and not prices for indexes or securities publicly traded.
 
@@ -827,21 +826,20 @@ If we look at the above graph we see many relationships we would expect. Cases a
 
 [10] Schwab survey <https://www.cnbc.com/2021/04/08/a-large-chunk-of-the-retail-investing-crowd-got-their-start-during-the-pandemic-schwab-survey-shows.html>
 
-[11] [The piranha problem: Large effects swimming in a small pond, Tosh et. al](http://www.stat.columbia.edu/~gelman/research/unpublished/piranhas.pdf)
+[11] [The piranha problem: Large effects swimming in a small pond, Tosh et. al](<http://www.stat.columbia.edu/~gelman/research/unpublished/piranhas.pdf>)
 
-[12] [How Coronavirus Helped TikTok Find Its Voice](https://www.theguardian.com/technology/2020/apr/26/how-coronavirus-helped-tiktok-find-its-voice)
+[12] [How Coronavirus Helped TikTok Find Its Voice](<https://www.theguardian.com/technology/2020/apr/26/how-coronavirus-helped-tiktok-find-its-voice>)
 
-[13] [Tiktok: Usage during COVID-19](https://www.statista.com/statistics/1207831/tiktok-usage-among-young-adults-during-covid-19-usa/)
+[13] [Tiktok: Usage during COVID-19](<https://www.statista.com/statistics/1207831/tiktok-usage-among-young-adults-during-covid-19-usa/>)
 
-[14] [Coronavirus TV Time: Netflix's 'Tiger King' Transcends Isolation to Build Community](https://www.usatoday.com/story/opinion/2020/04/12/tiger-king-transends-coronavirus-isolation-builds-community-column/5133790002/)
+[14] [Coronavirus TV Time: Netflix's 'Tiger King' Transcends Isolation to Build Community](<https://www.usatoday.com/story/opinion/2020/04/12/tiger-king-transends-coronavirus-isolation-builds-community-column/5133790002/>)
 
-[15] [The Crass Pleasures of ‘Tiger King.’](https://www.newyorker.com/magazine/2020/04/13/the-crass-pleasures-of-tiger-king?source=search_google_dsa_paid&gclid=CjwKCAjw2bmLBhBREiwAZ6ugo0lo_x8zFaYo46W3bEURL1GOdke2wwfuRVze-oEDMyWvvOmnfIsPJRoCqiYQAvD_BwE)
+[15] [The Crass Pleasures of 'Tiger King.'](<https://www.newyorker.com/magazine/2020/04/13/the-crass-pleasures-of-tiger-king?source=search_google_dsa_paid&gclid=CjwKCAjw2bmLBhBREiwAZ6ugo0lo_x8zFaYo46W3bEURL1GOdke2wwfuRVze-oEDMyWvvOmnfIsPJRoCqiYQAvD_BwE>)
 
-[16] [How the Coronavirus Created a Toilet Paper Shortage](https://cnr.ncsu.edu/news/2020/05/coronavirus-toilet-paper-shortage/)
+[16] [How the Coronavirus Created a Toilet Paper Shortage](<https://cnr.ncsu.edu/news/2020/05/coronavirus-toilet-paper-shortage/>)
 
-[17] [What Is Dalgona Coffee? the Whipped Coffee Trend Taking over the Internet during Coronavirus Isolation](https://theconversation.com/what-is-dalgona-coffee-the-whipped-coffee-trend-taking-over-the-internet-during-coronavirus-isolation-137068)
+[17] [What Is Dalgona Coffee? the Whipped Coffee Trend Taking over the Internet during Coronavirus Isolation](<https://theconversation.com/what-is-dalgona-coffee-the-whipped-coffee-trend-taking-over-the-internet-during-coronavirus-isolation-137068>)
 
-[18] [Why Animal Crossing Is the Game for the Coronavirus Moment](https://www.nytimes.com/2020/04/07/arts/animal-crossing-covid-coronavirus-popularity-millennials.html)
+[18] [Why Animal Crossing Is the Game for the Coronavirus Moment](<https://www.nytimes.com/2020/04/07/arts/animal-crossing-covid-coronavirus-popularity-millennials.html>)
 
-[19] [Sales of Animal Crossing: New Horizons Worldwide 2021](https://www.statista.com/statistics/1112631/animal-crossing-new-horizons-sales/#:~:text=Animal%20Crossing%3A%20New%20Horizons%20unit%20sales%20worldwide%202021&text=The%20Nintendo%20title%20was%20a,sits%20at%2033.89%20million%20units)
-
+[19] [Sales of Animal Crossing: New Horizons Worldwide 2021](<https://www.statista.com/statistics/1112631/animal-crossing-new-horizons-sales/#>:\~:text=Animal%20Crossing%3A%20New%20Horizons%20unit%20sales%20worldwide%202021&text=The%20Nintendo%20title%20was%20a,sits%20at%2033.89%20million%20units)
