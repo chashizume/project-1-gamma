@@ -199,8 +199,14 @@ Graphs like this can tell us what people were searching for at any particular ti
 ```{r}
 df_nyt_national <- df_nyt_normalized %>%
   group_by(date) %>%
-  summarize(cases = sum(cases)) %>%
-  mutate(dcases_dt = cases - lag(cases))
+  summarize(cases = sum(cases), deaths = sum(deaths)) %>%
+  mutate(
+    dcases_dt = cases - lag(cases),
+    ddeaths_dt = deaths - lag(deaths)
+  )
+
+df_nyt_national
+
 
 ggplot() +
 geom_line(
@@ -591,7 +597,197 @@ Until now we have focused our analysis on showing trends between variables over 
 
 We calculated the time-synchronized correlation between a number of search terms and common pandemic metric such as cases, deaths, and vaccinations. While many of these factors have little correlation, some stand out as being much more tightly coupled.
 
-\*\*\* insert graph here \*\*\*
+```{r}
+df_vax_death <- 
+  gtrends(
+    c("vaccine death"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+df_vax_cause_covid <- 
+  gtrends(
+    c("vaccine causes covid"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+df_vax_microchip <- 
+  gtrends(
+    c("vaccine microchip"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+df_vax_5g <- 
+  gtrends(
+    c("vaccine 5g"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+
+df_mesh_mask <- 
+  gtrends(
+    c("mesh mask"), 
+    geo = c("US"), 
+    time = "2020-03-01 2021-10-01",
+    onlyInterest = TRUE
+  )$interest_over_time %>% 
+  mutate(
+    date = as.Date(date),
+    hits = if_else(hits == "<1", 0, as.numeric(hits))
+  )
+```
+
+```{r}
+df_searches <- df_vax_death %>%
+  bind_rows(df_vax_cause_covid) %>%
+  bind_rows(df_vax_5g) %>%
+  bind_rows(df_vax_microchip) %>%
+  bind_rows(df_mesh_mask) %>%
+  pivot_wider(
+    names_from = keyword,
+    values_from = hits 
+  )
+```
+
+```{r}
+df_nyt_weekly <- df_nyt_national %>%
+  mutate(date = as.Date(cut(as.Date(date), "week")) - 1) %>%
+  group_by(date) %>%
+  summarise(
+    daily_cases_7d_avg = mean(dcases_dt, na.rm = TRUE),
+    daily_deaths_7d_avg = mean(ddeaths_dt, na.rm = TRUE)
+  )
+```
+
+```{r}
+df_vax_weekly <- df_vax %>%
+  mutate(date = as.Date(cut(date, "week")) - 1) %>%
+  group_by(date) %>%
+  summarise(
+    vaccinations = mean(daily_vaccinations, na.rm = TRUE)
+  )
+```
+
+```{r}
+df_corr <- df_nyt_weekly %>%
+  left_join(df_vax, by = 'date') %>%
+  left_join(df_searches, by = 'date') %>%
+  select(daily_cases_7d_avg, daily_deaths_7d_avg, daily_vaccinations, people_fully_vaccinated, "vaccine death", "vaccine causes covid", "vaccine 5g", "vaccine microchip", "mesh mask")
+
+df_corrplot <- correlate(df_corr) %>%
+  mutate_all(funs(ifelse(is.na(.), 1, .)))
+```
+
+```{r}
+df_corrplot %>%
+  pivot_longer(!term, names_to = "term2", values_to = "count") %>%
+  mutate(count = round(count, 2)) %>%
+  ggplot() +
+  geom_tile(
+    mapping = aes(
+      x = term, 
+      y = term2, 
+      fill = count
+    ),
+    color = "black"
+  ) +
+  geom_text(
+     mapping = aes(
+      x = term, 
+      y = term2,
+      label = count
+     )
+  ) + 
+  scale_color_gradient2(
+    midpoint=0, 
+    low="#077BE3", 
+    mid="white",
+    high="#D62246", 
+    space ="Lab", 
+    limits = c(-1,1)
+  ) +
+  
+  scale_fill_gradient2(
+    midpoint=0, 
+    low="#077BE3", 
+    mid="white",
+    high="#D62246", 
+    space ="Lab", 
+    limits = c(-1,1)
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_x_discrete(
+    limits = c(
+      "daily_cases_7d_avg", 
+      "daily_deaths_7d_avg", 
+      "daily_vaccinations", 
+      "people_fully_vaccinated", 
+      "vaccine causes covid", 
+      "vaccine death", 
+      "vaccine 5g", 
+      "vaccine microchip"
+    ),
+    labels = c(
+      "daily_cases_7d_avg" = "Daily COVID Cases", 
+      "daily_deaths_7d_avg" = "Daily COVID Deaths", 
+      "daily_vaccinations" = "Daily Vaccinations", 
+      "people_fully_vaccinated" = "Number of People Fully Vaccinated", 
+      "vaccine causes covid" = "Search Term: \"vaccine causes covid\"", 
+      "vaccine death" = "Search Term: \"vaccine death\"", 
+      "vaccine 5g" = "Search Term: \"vaccine 5g\"", 
+      "vaccine microchip" = "Search Term: \"vaccine microchip\""
+    )
+  ) +
+  scale_y_discrete(
+    limits = c(
+      "vaccine microchip",
+      "vaccine 5g",
+      "vaccine death", 
+      "vaccine causes covid",
+      "people_fully_vaccinated",
+      "daily_vaccinations",
+      "daily_deaths_7d_avg", 
+      "daily_cases_7d_avg"
+    ),
+    labels = c(
+      "daily_cases_7d_avg" = "Daily COVID Cases", 
+      "daily_deaths_7d_avg" = "Daily COVID Deaths", 
+      "daily_vaccinations" = "Daily Vaccinations", 
+      "people_fully_vaccinated" = "Number of People Fully Vaccinated", 
+      "vaccine causes covid" = "Search Term: \"vaccine causes covid\"", 
+      "vaccine death" = "Search Term: \"vaccine death\"", 
+      "vaccine 5g" = "Search Term: \"vaccine 5g\"", 
+      "vaccine microchip" = "Search Term: \"vaccine microchip\""
+    )
+  ) +
+  labs(
+    x = NULL,
+    y = NULL
+  )
+```
 
 If we look at the above graph we see many relationships we would expect. Cases and deaths show a strong positive correlation while cases and vaccinations show a strong negative correlation. We also see some interesting correlations between search queries and pandemic metrics. Vaccine death, vaccine microchip, vaccine causes covid, and vaccine 5g are all positively correlated with cases and deaths, but also with daily vaccinations. This positive correlation between so many variables likely implies that there are underlying factors either in people's behavior or simply in the progression of the pandemic that confound our study of their dependence. For this reason we can not make any comment as to the causality in either direction between pandemic variables and search terms.
 
