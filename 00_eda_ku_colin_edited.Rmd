@@ -424,44 +424,181 @@ df_corr <- df_weekly_covid %>%
 
 df_corrplot <- correlate(df_corr) %>%
   mutate_all(funs(ifelse(is.na(.), 1, .)))
-ggcorrplot(df_corrplot)
+# ggcorrplot(df_corrplot)
 
 df_corrplot %>%
   rplot()
 ```
-
 ```{r}
-df_c <- Hmisc::rcorr(as.matrix(df_corr))
-
-formatted_cors <- function(df){
-  cors(df) %>%
-    map(~rownames_to_column(.x, var="measure1")) %>%
-    map(~pivot_longer(.x, -measure1, "measure2")) %>%
-    bind_rows(.id = "id") %>%
-    pivot_wider(names_from = id, values_from = value) %>%
-    rename(p = P) %>%
-    mutate(sig_p = ifelse(p < .05, T, F),
-           p_if_sig = ifelse(sig_p, p, NA),
-           r_if_sig = ifelse(sig_p, r, NA)) 
-}
-
-df_c <- formatted_cors(df_c)
+df_corrplot
 ```
 
-```{r}
 
-df_corrplot
+```{r, fig.height = 5}
+df_corrplot %>%
+  pivot_longer(!term, names_to = "term2", values_to = "count") %>%
+  mutate(count = round(count, 2)) %>%
+  ggplot() +
+  geom_tile(
+    mapping = aes(
+      x = term, 
+      y = term2, 
+      fill = count
+    ),
+    color = "black"
+  ) +
+  geom_text(
+     mapping = aes(
+      x = term, 
+      y = term2,
+      label = count
+     )
+  ) + 
+  scale_color_gradient2(
+    midpoint=0, 
+    low="#077BE3", 
+    mid="white",
+    high="#D62246", 
+    space ="Lab", 
+    limits = c(-1,1)
+  ) +
+  
+  scale_fill_gradient2(
+    midpoint=0, 
+    low="#077BE3", 
+    mid="white",
+    high="#D62246", 
+    space ="Lab", 
+    limits = c(-1,1)
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_x_discrete(
+    limits = c(
+      "cases", 
+      "deaths", 
+      "daily_vaccinations", 
+      "people_fully_vaccinated", 
+      "vaccine causes covid", 
+      "vaccine death", 
+      "vaccine 5g", 
+      "vaccine microchip"
+    ),
+    labels = c(
+      "cases" = "Daily COVID Cases", 
+      "deaths" = "Daily COVID Deaths", 
+      "daily_vaccinations" = "Daily Vaccinations", 
+      "people_fully_vaccinated" = "Number of People Fully Vaccinated", 
+      "vaccine causes covid" = "Search Term: \"vaccine causes covid\"", 
+      "vaccine death" = "Search Term: \"vaccine death\"", 
+      "vaccine 5g" = "Search Term: \"vaccine 5g\"", 
+      "vaccine microchip" = "Search Term: \"vaccine microchip\""
+    )
+  ) +
+  scale_y_discrete(
+    limits = c(
+      "vaccine microchip",
+      "vaccine 5g",
+      "vaccine death", 
+      "vaccine causes covid",
+      "people_fully_vaccinated",
+      "daily_vaccinations",
+      "deaths", 
+      "cases"
+    ),
+    labels = c(
+      "cases" = "Daily COVID Cases", 
+      "deaths" = "Daily COVID Deaths", 
+      "daily_vaccinations" = "Daily Vaccinations", 
+      "people_fully_vaccinated" = "Number of People Fully Vaccinated", 
+      "vaccine causes covid" = "Search Term: \"vaccine causes covid\"", 
+      "vaccine death" = "Search Term: \"vaccine death\"", 
+      "vaccine 5g" = "Search Term: \"vaccine 5g\"", 
+      "vaccine microchip" = "Search Term: \"vaccine microchip\""
+    )
+  ) +
+  labs(
+    x = NULL,
+    y = NULL
+  )
+```
+
+```{r, fig.height = 5}
 df_corrplot %>%
   pivot_longer(!term, names_to = "term2", values_to = "count") %>%
   ggplot() +
-  geom_point(mapping = aes(x = reorder(term, desc(term)), y = term2, size = abs(count), color = count))+
-  scale_color_gradient2(midpoint=0, low="blue", mid="white",
-                     high="red", space ="Lab", limits = c(-1,1)) +
+  geom_(
+    mapping = aes(x = term, y = term2, fill = count)
+  ) +
+  # scale_color_gradient2(
+  #   midpoint=0, 
+  #   low="blue", 
+  #   mid="white",
+  #   high="red", 
+  #   space ="Lab", 
+  #   limits = c(-1,1)
+  # ) +
+  scale_fill_gradient2(
+    midpoint = 0,
+    mid = "yellow",
+    low = "green",
+    high = "red",
+    limits = c(-1, +1)
+  ) +
+  
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_size(limits = c(0,1))
-                     
-
+  scale_size(limits = c(0,1)) +
+  scale_x_discrete(
+    limits = c(
+      "cases", 
+      "deaths", 
+      "daily_vaccinations", 
+      "people_fully_vaccinated", 
+      "vaccine causes covid", 
+      "vaccine death", 
+      "vaccine 5g", 
+      "vaccine microchip"
+    ),
+    labels = c(
+      "cases" = "Daily COVID Cases", 
+      "deaths" = "Daily COVID Deaths", 
+      "daily_vaccinations" = "Daily Vaccinations", 
+      "people_fully_vaccinated" = "Number of People Fully Vaccinated", 
+      "vaccine causes covid" = "Search Term: \"vaccine causes covid\"", 
+      "vaccine death" = "Search Term: \"vaccine death\"", 
+      "vaccine 5g" = "Search Term: \"vaccine 5g\"", 
+      "vaccine microchip" = "Search Term: \"vaccine microchip\""
+    )
+  ) +
+  scale_y_discrete(
+    limits = c(
+      "vaccine microchip",
+      "vaccine 5g",
+      "vaccine death", 
+      "vaccine causes covid",
+      "people_fully_vaccinated",
+      "daily_vaccinations",
+      "deaths", 
+      "cases"
+    ),
+    labels = c(
+      "cases" = "Daily COVID Cases", 
+      "deaths" = "Daily COVID Deaths", 
+      "daily_vaccinations" = "Daily Vaccinations", 
+      "people_fully_vaccinated" = "Number of People Fully Vaccinated", 
+      "vaccine causes covid" = "Search Term: \"vaccine causes covid\"", 
+      "vaccine death" = "Search Term: \"vaccine death\"", 
+      "vaccine 5g" = "Search Term: \"vaccine 5g\"", 
+      "vaccine microchip" = "Search Term: \"vaccine microchip\""
+    )
+  ) +
+  labs(
+    x = NULL,
+    y = NULL
+  )
 ```
+```
+
 
 ```{r}
 df_corrplot %>%
