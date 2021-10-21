@@ -178,7 +178,7 @@ df_covid_gtrends <-
     time = "today+5-y", 
     geo = c("US", "US", "US", "US")
   )$interest_over_time %>%
-  mutate(hits = replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = replace(hits, hits == "<1", "0")) %>%
   mutate(hits = as.integer(hits)) %>%
   filter(date >= as.Date("2019-10-01"))
 
@@ -205,22 +205,19 @@ df_nyt_national <- df_nyt_normalized %>%
     ddeaths_dt = deaths - lag(deaths)
   )
 
-df_nyt_national
-
-
-ggplot() +
-geom_line(
-  data = df_nyt_national, 
-  mapping = aes(x =  as.POSIXct(date), y = dcases_dt)
-) +
-geom_line(
-  data = df_covid_gtrends, 
-  mapping = aes(x =  as.POSIXct(date), y = hits*3000, color = keyword)
-) +
-scale_y_continuous(
-  name = "Daily COVID cases",
-  sec.axis = sec_axis(~.*1/3000, name="Search Popularity")
-)
+df_nyt_national %>%
+  ggplot() +
+  geom_line(
+    mapping = aes(x = as.POSIXct(date), y = dcases_dt)
+  ) +
+  geom_line(
+    data = df_covid_gtrends, 
+    mapping = aes(x = as.POSIXct(date), y = hits * 3000, color = keyword)
+  ) +
+  scale_y_continuous(
+    name = "Daily COVID cases",
+    sec.axis = sec_axis(~. * 1 / 3000, name="Search Popularity")
+  )
 ```
 
 If we take that same data and overlay daily COVID cases we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on before there were almost any cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any significant increase during the major wave in the latter part of 2021.
@@ -256,23 +253,35 @@ To look at the effect of quarantine on the above search trends, we looked at the
 ```{r}
 df_startofcovid_gtrends <- 
   gtrends(
-    c("toilet paper", "animal crossing", "tiger king", "dalgona coffee", "tiktok"), 
+    c(
+      "toilet paper", 
+      "animal crossing", 
+      "tiger king", 
+      "dalgona coffee", 
+      "tiktok"
+    ), 
     time = "2020-03-01 2020-06-01",
     geo = c("US", "US", "US", "US", "US")
   )$interest_over_time %>%
-  mutate(hits = replace(hits, hits=="<1", "0")) %>%
+  mutate(hits = replace(hits, hits == "<1", "0")) %>%
   mutate(hits = as.integer(hits))
 
 df_nyt_national_startofcovid <-
-  df_nyt_national%>%
+  df_nyt_national %>%
   filter(date <= "2020-06-01" & date >= "2020-03-01")
 
-scale_factor <- max(df_nyt_national_startofcovid$dcases_dt) / max(df_startofcovid_gtrends$hits)
+scale_factor <- 
+  max(df_nyt_national_startofcovid$dcases_dt) / 
+  max(df_startofcovid_gtrends$hits)
 
-ggplot() +
-geom_line(
-  data = df_startofcovid_gtrends,
-  mapping = aes(x = as.POSIXct(date), y = hits * scale_factor, color = keyword)
+df_startofcovid_gtrends %>%
+  ggplot() +
+  geom_line(
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = hits * scale_factor, 
+      color = keyword
+    )
   ) +
   labs(
     x = "Date", 
@@ -280,38 +289,77 @@ geom_line(
     title = "Relative hits for several search queries"
   ) +
   geom_line(
-  data = df_nyt_national_startofcovid, 
-  mapping = aes(x = as.POSIXct(date), y = dcases_dt, color = "covid cases"), linetype = "dashed") +
+    data = df_nyt_national_startofcovid, 
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = dcases_dt, 
+      color = "covid cases"
+    ), 
+    linetype = "dashed"
+  ) +
   scale_y_continuous(
-  name = "Daily COVID cases",
-  sec.axis = sec_axis(~.*1/scale_factor, name="Search Popularity")
+    name = "Daily COVID cases",
+    sec.axis = sec_axis(~. * 1 / scale_factor, name = "Search Popularity")
   ) +
   scale_color_manual(
-  labels = c("Animal Crossing", "New Covid Cases in the US", "Dalgona Coffee", "Tiger King", "TikTok", "Toilet Paper"),
-  values = c("blue", "black", "purple", "orange", "red", "green")) +
+    labels = c(
+      "Animal Crossing", 
+      "New Covid Cases in the US", 
+      "Dalgona Coffee", 
+      "Tiger King", 
+      "TikTok", 
+      "Toilet Paper"
+    ),
+    values = c(
+      "blue", 
+      "black", 
+      "purple", 
+      "orange", 
+      "red", 
+      "green"
+    )
+  ) +
   theme(legend.title = element_blank())
 ```
 
 What we see in our graph largely follows both the data above and our lived experience. We see a spike in Tiger King and Animal Crossing as lock downs take over with cases soaring and our attention spans dropping. We also see searches for Toilet paper spiking and then dropping as panic buying stops and the supply chain adapts. We are able to see how Dalgona Coffee\`s search popularity grew and dropped off, as well as seeing how searches for TiKToK have continued to grow consistently through the first months of the pandemic. Though we do not track all the search trends throughout the entire pandemic or include all the trends that Google Searches picked up, we were able to plot some of the notable cultural moments in the early days of the pandemic seeing how, as a culture, we were adapting as COVID case numbers changed.
 
 ```{r}
-animal_crossing <-
-  df_startofcovid_gtrends %>%
+animal_crossing <- df_startofcovid_gtrends %>%
   filter(keyword == "animal crossing") %>%
   filter(date <= "2020-04-14" & date >= "2020-04-01")
 
-df_nyt_national_twoweeks <-
-  df_nyt_national%>%
+df_nyt_national_twoweeks <- df_nyt_national %>%
   filter(date <= "2020-04-14" & date >= "2020-04-01")
 
-ggplot() +
-  geom_line(data = df_nyt_national_twoweeks, aes(x = as.POSIXct(date), y = dcases_dt, color = "Covid Cases"), linetype = "dashed") +
-  geom_line(data = animal_crossing, aes(x = as.POSIXct(date), y = hits * scale_factor, color = keyword)) +
+df_nyt_national_twoweeks %>%
+  ggplot() +
+  geom_line(
+    aes(
+      x = as.POSIXct(date), 
+      y = dcases_dt, 
+      color = "Covid Cases"
+    ), 
+    linetype = "dashed"
+  ) +
+  geom_line(
+    data = animal_crossing, 
+    aes(
+      x = as.POSIXct(date), 
+      y = hits * scale_factor, 
+      color = keyword)
+  ) +
   scale_color_manual(
-  labels = c( "Animal Crossing Searches","New Covid Cases in the US"),
-  values = c("red", "black"), guide = guide_legend(reverse = TRUE)) +
+    labels = c(
+      "Animal Crossing Searches",
+      "New Covid Cases in the US"
+    ),
+    values = c("red", "black"), 
+    guide = guide_legend(reverse = TRUE)
+  ) +
   scale_linetype_manual(
-    guide = guide_legend(reverse = TRUE)) +
+    guide = guide_legend(reverse = TRUE)
+  ) +
   theme(legend.title = element_blank()) +
   labs(
     x = "Date", 
@@ -319,8 +367,8 @@ ggplot() +
     title = "Relative hits for several search queries"
   ) +
   scale_y_continuous(
-  name = "Daily COVID cases",
-  sec.axis = sec_axis(~.*1/scale_factor, name="Search Popularity")
+    name = "Daily COVID cases",
+    sec.axis = sec_axis(~. * 1 / scale_factor, name = "Search Popularity")
   )
 ```
 
@@ -380,30 +428,41 @@ df_financial_gtrends <-
   )$interest_over_time %>%
   mutate(
     date = as.Date(date),
-    hits = replace(hits, hits=="<1", "0"),
+    hits = replace(hits, hits == "<1", "0"),
     hits = as.integer(hits) 
-    )
-
+  )
 ```
 
 ```{r}
 scale_factor <- max(df_national_data$new_cases) / max(df_financial_gtrends$hits)
 
-ggplot() +
-  geom_line(data = df_national_data, aes(x = date, y = new_cases)) +
-  geom_line(data = df_financial_gtrends, aes(x = date, y = hits * scale_factor, color = keyword)) +
-  scale_y_continuous(name="Number of New Cases", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search")) +
+df_national_data %>%
+  ggplot() +
+  geom_line(aes(x = date, y = new_cases)) +
+  geom_line(
+    data = df_financial_gtrends, 
+    aes(x = date, y = hits * scale_factor, color = keyword)
+  ) +
+  scale_y_continuous(
+    name = "Number of New Cases", 
+    sec.axis = sec_axis(~. / scale_factor, name = "Popularity of Google Search")
+  ) +
   theme(legend.position = 'bottom')
-
 ```
 
 ```{r}
 scale_factor <- max(df_vax$daily_vaccinations) / max(df_financial_gtrends$hits)
 
-ggplot() +
-  geom_line(data = df_vax, aes(x = date, y = daily_vaccinations)) +
-  geom_line(data = df_financial_gtrends, aes(x = date, y = hits * scale_factor, color = keyword)) +
-  scale_y_continuous(name="Number of Vaccinated People in US", sec.axis=sec_axis(~./scale_factor, name="Popularity of Google Search"))
+df_vax %>%
+  ggplot() +
+  geom_line(aes(x = date, y = daily_vaccinations)) +
+  geom_line(
+    data = df_financial_gtrends, 
+    aes(x = date, y = hits * scale_factor, color = keyword)
+  ) +
+  scale_y_continuous(
+    name = "Number of Vaccinated People in US", 
+    sec.axis=sec_axis(~. / scale_factor, name="Popularity of Google Search"))
 
 ```
 
@@ -436,30 +495,30 @@ df_fake_cures <-
   mutate(hits = as.integer(hits)) %>%
   filter(date >= as.Date("2019-10-01"))
 
-ggplot() +
-geom_line(
-  data = df_nyt_national, 
-  mapping = aes(x = as.POSIXct(date), y = dcases_dt)
-) +
-geom_line(
-  data = df_fake_cures, 
-  mapping = aes(x =  as.POSIXct(date), y = hits*5000, color = keyword)
-) +
-scale_y_continuous(
-  name = "Daily COVID cases",
-  sec.axis = sec_axis(~.*.0002, name="Search Popularity")
-) +
-labs(
-  x = "Date", 
-  y = "New COVID cases, 7-day rolling average",
-  title = 
-    "Google search popularity for four medications and COVID cases"
-) +
-theme(plot.title = element_text(hjust = 0.5)) +
-guides(
-  fill = guide_legend(keywidth = 3, keyheight = 1), 
-  linetype = guide_legend(keywidth = 3, keyheight = 1)
-)
+df_nyt_national %>%
+  ggplot() +
+  geom_line(
+    mapping = aes(x = as.POSIXct(date), y = dcases_dt)
+  ) +
+  geom_line(
+    data = df_fake_cures, 
+    mapping = aes(x =  as.POSIXct(date), y = hits*5000, color = keyword)
+  ) +
+  scale_y_continuous(
+    name = "Daily COVID cases",
+    sec.axis = sec_axis(~.*.0002, name="Search Popularity")
+  ) +
+  labs(
+    x = "Date", 
+    y = "New COVID cases, 7-day rolling average",
+    title = 
+      "Google search popularity for four medications and COVID cases"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  guides(
+    fill = guide_legend(keywidth = 3, keyheight = 1), 
+    linetype = guide_legend(keywidth = 3, keyheight = 1)
+  )
 ```
 
 Many of these spikes were driven by media attention that was often started by tweets or speeches from prominent political figures. For example, former president Donald Trump first [tweeted about hydroxychloroquine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7685699/) on the same day (March 21, 2020) as the first major spike in searches for the term[4].
@@ -479,55 +538,55 @@ df_ivermectin <-
 
 num <- 3000
 
-ggplot() +
-geom_ma(
-  data = df_nyt_national, 
-  ma_fun = SMA, 
-  n = 7, 
-  mapping = aes(
-    x = as.POSIXct(date), 
-    y = dcases_dt, 
-    color = "Daily COVID cases",
-    linetype = "Daily COVID cases"
-  )) +
-geom_line(
-  data = df_ivermectin, 
-  mapping = aes(
-    x = as.POSIXct(date), 
-    y = hits*num, 
-    color = "Search popularity",
-    linetype = "Search popularity"
+df_nyt_national %>%
+  ggplot() +
+  geom_ma(
+    ma_fun = SMA, 
+    n = 7, 
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = dcases_dt, 
+      color = "Daily COVID cases",
+      linetype = "Daily COVID cases"
+    )) +
+  geom_line(
+    data = df_ivermectin, 
+    mapping = aes(
+      x = as.POSIXct(date), 
+      y = hits*num, 
+      color = "Search popularity",
+      linetype = "Search popularity"
+    )
+  ) +
+  scale_y_continuous(
+    name = "Daily COVID cases",
+    sec.axis = sec_axis(~.*1/num, name="Search Popularity")
+  ) +
+  labs(
+    x = "Date", 
+    y = "New COVID cases, 7-day rolling average",
+    title = 
+      "Google search popularity for 'Ivermectin for sale' and COVID cases"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(
+    name = "Data",
+    breaks = c("Search popularity", "Daily COVID cases"),
+    values = c(
+      "Search popularity" = "darkred", 
+      "Daily COVID cases" = "steelblue"
+    )) +
+  scale_linetype_manual(
+    name = "Data",
+    values = c(
+      "Search popularity" = 1, 
+      "Daily COVID cases" = 2
+    )
+  ) + 
+  guides(
+    fill = guide_legend(keywidth = 3, keyheight = 1), 
+    linetype = guide_legend(keywidth = 3, keyheight = 1)
   )
-) +
-scale_y_continuous(
-  name = "Daily COVID cases",
-  sec.axis = sec_axis(~.*1/num, name="Search Popularity")
-) +
-labs(
-  x = "Date", 
-  y = "New COVID cases, 7-day rolling average",
-  title = 
-    "Google search popularity for 'Ivermectin for sale' and COVID cases"
-) +
-theme(plot.title = element_text(hjust = 0.5)) +
-scale_color_manual(
-  name = "Data",
-  breaks = c("Search popularity", "Daily COVID cases"),
-  values = c(
-    "Search popularity" = "darkred", 
-    "Daily COVID cases" = "steelblue"
-  )) +
-scale_linetype_manual(
-  name = "Data",
-  values = c(
-    "Search popularity" = 1, 
-    "Daily COVID cases" = 2
-  )
-) + 
-guides(
-  fill = guide_legend(keywidth = 3, keyheight = 1), 
-  linetype = guide_legend(keywidth = 3, keyheight = 1)
-)
 ```
 
 NOTE: COVID data has been smoothed with a 7-day moving average to account for weekly inaccuracies due to test numbers decreasing on weekends.
@@ -553,37 +612,37 @@ df_vaccine_5g <-
 
 scale_factor <- max(df_vax$daily_vaccinations) / max(df_vaccine_5g$hits)
 
-ggplot() +
-geom_line(
-    data = df_vax, 
-    aes(
+df_vax %>%
+  ggplot() +
+  geom_line( 
+      aes(
+        x = date, 
+        y = daily_vaccinations, 
+        color = "Daily Vaccinations", 
+        linetype = "Daily Vaccinations"
+      )
+  ) +
+  geom_ma(
+    data = df_vaccine_5g, 
+    ma_fun = SMA, 
+    n = 2, 
+    mapping = aes(
       x = date, 
-      y = daily_vaccinations, 
-      color = "Daily Vaccinations", 
-      linetype = "Daily Vaccinations"
-    )
-) +
-geom_ma(
-  data = df_vaccine_5g, 
-  ma_fun = SMA, 
-  n = 2, 
-  mapping = aes(
-    x = date, 
-    y = hits * scale_factor, 
-    color = "Search popularity", 
-    linetype = "Search popularity")
-) +
-scale_y_continuous(
-  name = "Daily Vaccinations in the US", 
-  sec.axis = sec_axis(~./scale_factor, name="Popularity of Google Search")
-) +
-labs(
-  x = "Date", 
-  y = "New COVID cases, 7-day rolling average",
-  title = 
-    "Google search popularity for 'vaccine 5g' and daily vaccinations"
-) +
-theme(plot.title = element_text(hjust = 0.5))
+      y = hits * scale_factor, 
+      color = "Search popularity", 
+      linetype = "Search popularity")
+  ) +
+  scale_y_continuous(
+    name = "Daily Vaccinations in the US", 
+    sec.axis = sec_axis(~./scale_factor, name="Popularity of Google Search")
+  ) +
+  labs(
+    x = "Date", 
+    y = "New COVID cases, 7-day rolling average",
+    title = 
+      "Google search popularity for 'vaccine 5g' and daily vaccinations"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 The term 'vaccine 5g' was trending as early as March 15, as US COVID numbers were just starting to increase, and months before any viable vaccine was in human trials. This increase was likely related to news coverage on the topic which began as early as [May 18](https://maldita.es/malditaciencia/20200518/post-facebook-coronavirus-vacunas-chemtrails-5g/) but increased in early March [5]. The BBC did an analysis of [social media posts related to the topic](https://www.bbc.com/news/53191523) and found that they had substantial reach across the globe [6]. In this case it is actually interesting to note that searches do not seem to be well correlated with vaccination rates but rather with critical events in the vaccination timeline. We see a spike at the very beginning of the pandemic, a spike as large-scale vaccinations begin, and a few more spikes as vaccinations increase then taper off. Not all of the trends in searches can be explained by these events but they do seem to overlap with many of them.
@@ -727,7 +786,6 @@ df_corrplot %>%
     space ="Lab", 
     limits = c(-1,1)
   ) +
-  
   scale_fill_gradient2(
     midpoint=0, 
     low="#077BE3", 
