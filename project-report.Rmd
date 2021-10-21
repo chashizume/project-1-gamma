@@ -364,7 +364,7 @@ df_nyt_national_twoweeks %>%
   labs(
     x = "Date", 
     y = "Hits", 
-    title = "Relative hits for several search queries"
+    title = "Animal Crossing Search Popularity and Daily COVID Cases"
   ) +
   scale_y_continuous(
     name = "Daily COVID cases",
@@ -379,43 +379,6 @@ Looking closer at a 2-week section of Animal crossing data vs Covid cases, we se
 During the past two years or so, the COVID-19 pandemic has been quite devastating for people all across the country in terms of health, job loss, and other risks onto their livelihood. However, we observed growth in other socio-economic metrics like the saving rate soaring at 33.7% in April 2020 [8]. Having more disposable income paired with the stimulus checks garnered interest in the stock markets lead all three key indexes (S&P500, NASDAQ, Dow Jones) up in the Q4 2020 and Q1 2021 average an increase of 17-27% [9]. In that regard, we wanted to examine if certain key search terms capture this new found enthusiasm for the average American for the stock market.
 
 P.S: Reminder that we are working with aggregated data of searches and not prices for indexes or securities publicly traded.
-
-```{r}
-df_national_data <- df_covid %>%
-  group_by(date) %>%
-  summarize(
-    total_cases = sum(cases, na.rm = TRUE),
-    total_deaths = sum(deaths, na.rm = TRUE)
-  ) %>%
-  mutate(
-    new_cases = total_cases - lag(total_cases),
-    new_cases = ifelse(is.na(new_cases), 0, new_cases),
-    new_deaths = total_deaths - lag(total_deaths),
-    new_deaths = ifelse(is.na(new_deaths), 0, new_deaths)
-  )
-
-tail(df_national_data)
-
-## URL for the OWID vaccination data
-url_vax <- 
-  "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"
-filename_vax <- "./data/owid_vax.csv"
-
-## Download the data locally
-curl::curl_download(
-        url_vax,
-        destfile = filename_vax
-      )
-
-## Loads the downloaded csv
-df_vax <- read_csv(filename_vax) %>%
-  filter(location == "United States") %>%
-  drop_na(daily_vaccinations)
-
-df_vax
-
-
-```
 
 In pulling the trends data, we explored a different terms and opted to highlights two phrases that are "stock market" as a direct reference to financial trading markets and "robinhood" as a popular platform facilitating trading for retail investors.
 
