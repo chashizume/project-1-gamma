@@ -1,7 +1,7 @@
 ---
 title: "Project Report"
 author: "Team Gamma"
-date: 2021-10-14
+date: 2021-10-20
 output:
   github_document:
     toc: true
@@ -23,19 +23,19 @@ library(ggcorrplot)
 
 In this project, our team set out to explore relationships between Google search trends and the state of the COVID-19 pandemic. Our central question was the following: "How does Google search activity correlate with the pandemic?"
 
-## Background
+## Data
 
 ### Google Trends
 
-[Google Trends](https://trends.google.com/trends/?geo=US)[1] provides Google search data, showing a measure of interest in a keyword and topic over time. Google trends anonymizes, categorizes, and groups together data, from which we can access a representative sample. It also normalizes search data by dividing each data point by total searches of location and time it represents and scaling numbers on a range of 0 to 100.
+[Google Trends](https://trends.google.com/trends/?geo=US)[1] provides Google search data, showing a measure of interest in a keyword or topic over time. Google trends anonymizes, categorizes, and groups together data, from which we can access a representative sample. It also normalizes search data by dividing each data point by total searches in the location and time it represents and scaling the result on a scale of 0 to 100.
 
-We pulled data from Google Trends to see how people react to different moments during the pandemic and explore the magnitude of those moments. When choosing specific search terms, we looked at the visual output on the Google Trends site to see if we can discover interesting patterns before bringing the data into R
+We pulled data from Google Trends to explore how search terms might reflect underlying behaviors within the US population during the pandemic.
 
-To access Google Trends data without having to manually downloading .csv files for each query, we used the R package [`gtrendsR`](https://cran.r-project.org/web/packages/gtrendsR/gtrendsR.pdf) which scrapes the Google Trends site. We used `gtrends()` with different parameters for search keyword, time, and geographical location.
+To access Google Trends data without having to manually download .csv files for each query, we used the R package [`gtrendsR`](https://cran.r-project.org/web/packages/gtrendsR/gtrendsR.pdf) which scrapes the Google Trends site and returns data in an R-readable form. We used `gtrends()` with different parameters for search keyword, time, and geographical location.
 
 ### New York Times COVID-19 Cases and Census Bureau
 
-The New York Times (NYT) has been collecting and publishing COVID case and death data since the first recorded case back in January 2020. The dataset is collected from local and state governments and health department in the Times' attempt to create a fuller picture of the pandemic. Data is reported by county and state and is publicly available via [GitHub](https://github.com/nytimes/covid-19-data).
+The New York Times (NYT) has been collecting and publishing COVID case and death data since the first recorded case back in January 2020. The dataset is collected from local and state governments and health departments in the Times' attempt to create a fuller picture of the pandemic. Data is reported by county and state and is publicly available via [GitHub](https://github.com/nytimes/covid-19-data).
 
 We pair the above COVID data with population data from the [Census Bureau](https://www.census.gov/data.html), and follow the steps provided in c06. The population data can be found [here](https://data.census.gov/cedsci/table?q=United%20States&t=Population%20Total&g=0100000US%240500000&tid=ACSDT1Y2017.B01003&vintage=2017&layer=state&cid=DP05_0001E).
 
@@ -103,7 +103,7 @@ summary(df_nyt_normalized)
 
 ### Dataset observations
 
-The New York Times and the Census Bureau are very reputable sources. The NYT is sourcing their data from government and public health authorities, while the Census is notably conducted as a government means of tracking population data.
+The New York Times and the Census Bureau are very reputable sources. The NYT is sourcing their data from government and public health authorities, while the Census is conducted as a government means of tracking population data.
 
 The current combined dataset has location, population, and time-based COVID case and death data. Based on the numbers shown through the `summarise()` function, we can see that the case and death counts are cumulative, not per day, as we may be used to when looking at NYT COVID charts.
 
@@ -119,7 +119,7 @@ In detail, the following variables are in this combined dataset:
 -   `total_cases_per100k`: `cases` normalized for population size
 -   `total_deaths_per100k`: `deaths` normalized for population size
 
-Like with any dataset, there are limitations. Since this data is reported and not automatically recorded by a sensor, per say, there's always room for undereporting, which is a [major concern](https://www.npr.org/2019/06/04/728034176/2020-census-could-lead-to-worst-undercount-of-black-latinx-people-in-30-years) when it comes to conducting the Census and using it to make legislative decisions [2]. There have been several moments in the last year and a half where the NYT had to update their data to fix double-counted cases, or when certain jurisdictions would report high numbers of cases or deaths after not reporting any for a few days [3]. Overall, though, the credibility of both datasets is clear, and these two sources are some of the best for using in our EDA. In short, the data isn't perfect, but it doesn't get much better than this for people-based data.
+Like with any dataset, there are limitations. Since this data is reported by organizations and not automatically recorded by a sensor, per say, there's always room for undereporting, which is a [major concern](https://www.npr.org/2019/06/04/728034176/2020-census-could-lead-to-worst-undercount-of-black-latinx-people-in-30-years) when it comes to conducting the Census and using it to make legislative decisions [2]. There have been several moments in the last year and a half where the NYT had to update their data to fix double-counted cases, or when certain jurisdictions would report high numbers of cases or deaths after not reporting any for a few days [3]. Overall, though, the credibility of both datasets is clear, and these two sources are some of the best for using in our EDA. In short, the data isn't perfect, but it doesn't get much better than this for people-based data.
 
 ### Vaccination Data
 
@@ -146,7 +146,7 @@ summary(df_vax)
 
 #### Dataset observations
 
-One reason we turned to the OWID dataset is because Google uses this data to create their in-house visuals related to COVID vaccinations, which spoke to the credibility of the data. For the scope of our project, we're more focused on the US, but this dataset does have international data. The per-capita values are calculated "based on the United Nations World Population Prospects", according to the OWID [site](https://ourworldindata.org/covid-vaccinations).
+One reason we turned to the OWID dataset is because Google uses this data to create their in-house visuals related to COVID vaccinations. For the scope of our project, we're more focused on the US, but this dataset does have international data. The per-capita values are calculated "based on the United Nations World Population Prospects", according to the OWID [site](https://ourworldindata.org/covid-vaccinations).
 
 In detail, the following variables are in this combined dataset:
 
@@ -164,11 +164,11 @@ In detail, the following variables are in this combined dataset:
 -   `total_boosters_per_hundred`: `total_boosters` per 100 people in total population of the country
 -   `daily_vaccinations_per_million`: `daily_vaccinations` per one million people in total population of the country
 
-Like with the COVID case and death data, we can assume there are going to be several days where vaccination numbers are not going to be reported, especially if many places don't distribute vaccinations on certain weekends or holidays. This could offer one explanation for the many NAs prevalent in this dataset. Because this data is likely reported from places that are actively distributing vaccines, we can assume minimal error with the exception of human miscounting. Unlike with the Census data, people who are getting vaccinated will have had to come into contact with some sort of healthcare professional in order to receive the vaccine, at which point they will likely get recorded. I think data reliability becomes more of an issue where the vaccine rollout infrastructure isn't as defined, and where vaccines are scarcer, which may be more of the case in developing countries or countries with low access to vaccines.
+Like with the COVID case and death data, we can assume there are going to be several days where vaccination numbers are not going to be reported, especially if many places don't distribute vaccinations on certain weekends or holidays. This could offer one explanation for the many NAs prevalent in this dataset. Because this data is likely reported from places that are actively distributing vaccines, we can assume minimal error with the exception of human miscounting. Unlike with the Census data, people who are getting vaccinated will have had to come into contact with some sort of healthcare professional in order to receive the vaccine, at which point they will likely get recorded. Data reliability is likely more of an issue where the vaccine rollout infrastructure isn't as defined and where vaccines are scarcer, which may be more likely in developing countries or countries with low access to vaccines.
 
 ### Google Trends Data
 
-We began by extracting data from Google trends and converting into a format which is useful for us. The data comes in as a list of dataframes which describe the time-dependent, location-dependent, and related searches to the given queries. We begin by extracting the time-dependent data, replacing the "\<1" elements with 0 so it can be converted to a numeric type, and selecting a data range we want to look at. We can then plot the popularity of searches over time.
+Google Trends data comes in as a list of dataframes which describe the time-dependent, location-dependent, and related searches to the given queries. We begin by extracting the time-dependent data, replacing the "\<1" elements with 0 so it can be converted to a numeric type, and selecting a date range we want to look at. We can then plot the popularity of searches over time.
 
 ```{r}
 # Search for "covid"-esque search popularity
@@ -220,7 +220,7 @@ df_nyt_national %>%
   )
 ```
 
-If we take that same data and overlay daily COVID cases, we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on, before there were almost any cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any increase during the major wave in the latter part of 2021.
+If we take that same data and overlay daily COVID cases we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on before there were almost any cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any significant increase during the major wave in the latter part of 2021.
 
 #### Quality of Google Data
 
@@ -236,17 +236,17 @@ The data we consider here (cases, searches, vaccinations, etc.) are all time dep
 
 ### Start of pandemic graphs
 
-At the beginning of the Covid 19 pandemic, the world underwent unprecedented changes, as lockdowns took over, borders closed, and many people transitioned to working from home. This dynamic produced some unexpected phenomenon adjacent to that of the Covid 19 virus. Using the same method described above we tracked some of the popular google searches from March to June, the first couple months of the shutdowns in the US, to see how the pandemic affected our society through lockdowns and shortages. At the start of looking into this topic, we created a list of cultural moments for the pandemic, from Tiger King to Sourdough Bread, and then narrowed our list down to five searches: Animal Crossing, Dalgona Coffee, Toilet paper, Tiger King, and TikTok. We felt that each item on the list had an impact on society during the early pandemic, and wanted to explore it further.
+At the beginning of the Covid 19 pandemic the world underwent unprecedented changes as lockdowns took over, borders closed, and many people transitioned to working from home. This dynamic produced some unexpected phenomenon adjacent to that of the Covid 19 virus. Using the same method described above we tracked some of the popular google searches from March to June, the first couple months of the shutdowns in the US, to see how the pandemic affected our society through lockdowns and shortages. At the start of looking into this topic, we created a list of cultural moments of the pandemic, from Tiger King to Sourdough Bread, and then narrowed our list down to five searches: Animal Crossing, Dalgona Coffee, Toilet paper, Tiger King, and TikTok. We felt that each item on the list had an impact on society during the early pandemic and wanted to explore it further.
 
-Animal Crossing: A New Horizon launched in March of 2020 just as lockdown became widespread. It quickly became a phenomenon with a New York Times article stating that "With the world in the grip of a pandemic, the … game is a conveniently timed piece of whimsy" [18]. It was a roaring success "selling more digital copies - five million - in a single month than any other console game in history." [19].
+Animal Crossing: A New Horizon launched in March of 2020 just as lockdowns became widespread. It quickly became a phenomenon with a New York Times article stating that "With the world in the grip of a pandemic, the … game is a conveniently timed piece of whimsy" [18]. It was a roaring success "selling more digital copies - five million - in a single month than any other console game in history." [19].
 
 Dalgona Coffee became a TikTok sensation in the early days of the pandemic, becoming "the most searched type of coffee worldwide" [17]. Katherin Kirkwood commented in her article "What Is Dalgona Coffee" that she felt "the Dalgona coffee craze has everything to do with our current COVID-19 induced isolation" and was a way to make cafe-style coffee with at-home ingredients [13]. She attributed the rise in Dalgona Coffee\`s popularity to the lockdowns and the visually appealing aesthetic it offered while at home, in other words, its "instagrammability".
 
-The toilet paper shortage was one of the first major effects covid 19 had on the world's supply change, and was a major sign that the pandemic was going to affect people's daily lives. According to Dr. Ronalds Gonzalez, the shortage was not so much due to supply chain failure, as later shortages would be, but more the panic buying consumer showed, which was a reflection of the effect covid had on the community. It was reported that "Nearly half of all grocery stores in the United States were out of stock of toilet paper for some part of the day on April 19" [16].
+The toilet paper shortage was one of the first major effects COVID 19 had on the world's supply change, and was a major sign that the pandemic was going to affect people's daily lives. According to Dr. Ronalds Gonzalez, the shortage was not so much due to supply chain failure, as later shortages would be, but more the panic buying consumer showed, which was a reflection of the effect COVID had on the community. It was reported that "Nearly half of all grocery stores in the United States were out of stock of toilet paper for some part of the day on April 19" [16].
 
 Our third search term, Tiger King, was launched on Netflix on March 20th, and was watched by "34.3 million unique viewers in the US … in its first 10 days of release"[15]. In a USA Today article, it was stated that despite the controversial message the documentary conveys, "it has given many a collective sense of community during a time when they are in self-isolation" [14]. It's important to note the sense of community given by the mass cult following of the show and how it connected people even though this highly stressful and polarized time.
 
-During the coronavirus (COVID-19) pandemic, TikTok saw a 180 percent increase in use [13]. Kenneth Goldsmith, author of Wasting Time on the Internet, sees TikTok's popularity as a natural reaction to the oppressive mania of a global lockdown – it is a pressure valve for people cooped up indoors. 'The only response to an existential situation is absurdity and humor,' Goldsmith says. 'It brings us back to the darker side of surrealism."'[12]. He claims that this absurdity is seen in popular TikToks, and the way that popular content lacks the perfection valued on other social media such as Instagram made it the perfect app for people stuck at home in an unperfect world- it was raw and real and what special teens needed during isolation [13]
+During the coronavirus (COVID-19) pandemic, TikTok saw a 180 percent increase in use [13]. Kenneth Goldsmith, author of Wasting Time on the Internet, sees TikTok's popularity as a natural reaction to the oppressive mania of a global lockdown – it is a pressure valve for people cooped up indoors. 'The only response to an existential situation is absurdity and humor,' Goldsmith says. 'It brings us back to the darker side of surrealism."'[12]. He claims that this absurdity is seen in popular TikToks, and the way that popular content lacks the perfection valued on other social media such as Instagram made it the perfect app for people stuck at home in an imperfect world- it was raw and real and what special teens needed during isolation [13]
 
 To look at the effect of quarantine on the above search trends, we looked at the time period of March 1st to June 1st of 2020.
 
@@ -322,7 +322,7 @@ df_startofcovid_gtrends %>%
   theme(legend.title = element_blank())
 ```
 
-What we see in our graph largely follows both the data above and our lived experience. We see a spike in Tiger King and Animal Crossing as lock downs take over with cases soaring and declining as cases do and our attention spans drop. We also see searches for Toilet paper spiking and then dropping as panic buying stops and the supply chain adapts. We are able to see how Dalgona Coffee\`s search popularity grew and dropped off, as well as seeing how searches for TiKToK have continued to grow consistently through the first months of the pandemic. Though we do not track all the search trends throughout the entire pandemic or include all the trends that Google Searches picked up, we were able to plot some of the notable cultural moments in the early days of the pandemic seeing how, as a culture, we were adapting as covid case numbers changed.
+What we see in our graph largely follows both the data above and our lived experience. We see a spike in Tiger King and Animal Crossing as lock downs take over with cases soaring and our attention spans dropping. We also see searches for Toilet paper spiking and then dropping as panic buying stops and the supply chain adapts. We are able to see how Dalgona Coffee\`s search popularity grew and dropped off, as well as seeing how searches for TiKToK have continued to grow consistently through the first months of the pandemic. Though we do not track all the search trends throughout the entire pandemic or include all the trends that Google Searches picked up, we were able to plot some of the notable cultural moments in the early days of the pandemic seeing how, as a culture, we were adapting as COVID case numbers changed.
 
 ```{r}
 animal_crossing <- df_startofcovid_gtrends %>%
@@ -372,15 +372,56 @@ df_nyt_national_twoweeks %>%
   )
 ```
 
-Looking closer at a 2-week section of Animal crossing data vs Covid cases, we see an interesting trend. We are not sure the reasoning for it, but found it interesting and wanted to point it out. In the graph seen above, we see that when the number of cases spikes, searches for Animal Crossing are at a low point. One theory we have is that the extreme points occurred on weekends when people have more time to play games and covid cases were not counted. We would have to explore deeper to know for sure, but nonetheless, we found the data interesting.
+Looking closer at a 2-week section of Animal crossing data vs Covid cases we see an interesting trend. When the number of cases spikes, searches for Animal Crossing are at a low point. If we dig into this a little further we see that these oscillations have a period of about a week. In fact, we notice that Apr 6 and Apr 13 are both Mondays. This suggests that interest in Animal Crossing might be higher on these Sundays than the rest of the week and that COVID cases seem to be lower on Sundays and Mondays. Animal Crossing increases seem to make sense on the weekends when people have more free time and many COVID testing centers were closed on the weekends so tests that take about a day to come back would come in at lower rates on Sundays and Mondays.
 
 ### Financial Decisions during the Pandemic
 
-During the past two years or so, the COVID-19 pandemic has been quite devastating for people all across the country in terms of health, job loss, and other risks onto their livelihood. However, we observed growth in other socio-economic metrics like the saving rate soaring at 33.7% in April 2020 [8]. Having more disposable income paired with the stimulus checks garnered interest in the stock markets lead all three key indexes (S&P500, NASDAQ, Dow Jones) up in the Q4 2020 and Q1 2021 average an increase of 17-27% [9]. In that regard, we wanted to examine if certain key search terms capture this new found enthusiasm for the average American for the stock market.
+During the past two years or so, the COVID-19 pandemic has been quite devastating for people all across the country in terms of health, job loss, and other risks to their livelihood. However, we observed growth in other socio-economic metrics like the saving rate soaring at 33.7% in April 2020 [8]. Having more disposable income paired with the stimulus checks garnered interest in the stock markets and led three key indexes (S&P500, NASDAQ, Dow Jones) up in the Q4 2020 and Q1 2021, averaging an increase of 17-27% [9]. We wanted to examine if certain key search terms capture this new found enthusiasm from the average American for the stock market.
 
-P.S: Reminder that we are working with aggregated data of searches and not prices for indexes or securities publicly traded.
+NOTE: We are working with aggregated data of searches and not prices for indexes or securities.
 
+<<<<<<< HEAD
 In pulling the trends data, we explored a different terms and opted to highlights two phrases that are "stock market" as a direct reference to financial trading markets and "robinhood" as a popular platform facilitating trading for retail investors.
+=======
+```{r}
+df_national_data <- df_covid %>%
+  group_by(date) %>%
+  summarize(
+    total_cases = sum(cases, na.rm = TRUE),
+    total_deaths = sum(deaths, na.rm = TRUE)
+  ) %>%
+  mutate(
+    new_cases = total_cases - lag(total_cases),
+    new_cases = ifelse(is.na(new_cases), 0, new_cases),
+    new_deaths = total_deaths - lag(total_deaths),
+    new_deaths = ifelse(is.na(new_deaths), 0, new_deaths)
+  )
+
+tail(df_national_data)
+
+## URL for the OWID vaccination data
+url_vax <- 
+  "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"
+filename_vax <- "./data/owid_vax.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_vax,
+        destfile = filename_vax
+      )
+
+## Loads the downloaded csv
+df_vax <- read_csv(filename_vax) %>%
+  filter(location == "United States") %>%
+  drop_na(daily_vaccinations)
+
+df_vax
+
+
+```
+
+In pulling the trends data, we explored different terms and opted to highlights two phrases: "stock market" as a direct reference to financial trading markets and "robinhood" as a popular platform facilitating trading for retail investors.
+>>>>>>> 209eff2d1179f5eb9d53a71f17f7a30c0986e119
 
 ```{r}
 df_financial_gtrends <- 
@@ -429,15 +470,15 @@ df_vax %>%
 
 ```
 
--   As mentioned earlier, we observed changes in spending and savings habits being stuck at home and for some, having the ability to work remotely further cutting on transportation expenses for instances. From the disposable income, the hypothesis will be that this new found capital fueled this new wave of investors. So, the trends from the Google search would capture this interest as people try to inform themselves and get into or out of the market.
+We observe changes in spending and saving habits from being stuck at home and, for some, having the ability to work remotely [8]. This increase in disposable income might account for greater participation or interest in the stock market, which in turn may explain some of the increases we see in searches on stock-related terms.
 
--   Indeed, we shall focus on two distinct periods: Q1 2020 marking the beginning of the pandemic and Q4 2020 with the new found optimism from the promising vaccine results.
+There are two distinct periods where we see large spikes in searches: Q1 2020 marking the beginning of the pandemic and Q4 2020 with the new found optimism from the promising vaccine results.
 
--   In that first period, we note that the "stock market" term is the only having a spike. On one hand, some investors would have probably considered exiting the market out of panic while others would have the foresight of certain stocks preponderant of various services key during the pandemic with their new found capital. [10]
+In Q1 of 2020 we see a huge spike in searches for the term "stock market" that then begins to taper off in the following months. While some investors may have considered exiting the market due to pandemic-related panic, others, such as a large portion of retail investors,  started investing with their new-found capital [10].
 
--   In the second period, there was the announcement from Pfizer on their effectiveness of their vaccine at 90% which would have fostered new optimism among investors. Other factors would also be important to highlights that are grass-roots online movement like r/[WallStreetBets] community on Reddit. [9]
+In Q4 2020, Pfizer announced that their new vaccine was over 90% effective. This revelation that the pandemic might be coming to an end likely contributed to the flurry of interest in both "robinhood" and "stock market" during that period. This period also saw the rise of  grass-roots online movements like the r/[WallStreetBets](https://www.reddit.com/r/wallstreetbets/) community on Reddit [9].
 
--   Overall, we cannot have state with certainty that the pandemic was the only factor, or even less to be denoted as the cause of those newly observed behaviors. However, from a financial analysis and forecasting perspective, this approach may offer an interesting route for further exploration.
+While we can not state with certainty that the pandemic is the central cause of any of these events, the strong correlation between spikes in searches and pandemic-related event suggests that the progression of the pandemic and its corresponding financial effects might have influenced peoples search behaviors.
 
 ### Misinfomation graphs
 
