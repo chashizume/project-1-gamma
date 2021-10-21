@@ -401,11 +401,12 @@ df_financial_gtrends <-
 ```
 
 ```{r}
-scale_factor <- max(df_national_data$new_cases) / max(df_financial_gtrends$hits)
+scale_factor <- max(df_nyt_national$dcases_dt, na.rm = TRUE) /
+  max(df_financial_gtrends$hits)
 
-df_national_data %>%
+df_nyt_national %>%
   ggplot() +
-  geom_line(aes(x = date, y = new_cases)) +
+  geom_line(aes(x = date, y = dcases_dt)) +
   geom_line(
     data = df_financial_gtrends, 
     aes(x = date, y = hits * scale_factor, color = keyword)
