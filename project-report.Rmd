@@ -217,7 +217,8 @@ df_nyt_national %>%
   scale_y_continuous(
     name = "Daily COVID cases",
     sec.axis = sec_axis(~. * 1 / 3000, name="Search Popularity")
-  )
+  ) +
+  labs(x = "Date")
 ```
 
 If we take that same data and overlay daily COVID cases we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on before there were almost any cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any significant increase during the major wave in the latter part of 2021.
@@ -266,8 +267,7 @@ df_startofcovid_gtrends <-
   mutate(hits = replace(hits, hits == "<1", "0")) %>%
   mutate(hits = as.integer(hits))
 
-df_nyt_national_startofcovid <-
-  df_nyt_national %>%
+df_nyt_national_startofcovid <- df_nyt_national %>%
   filter(date <= "2020-06-01" & date >= "2020-03-01")
 
 scale_factor <- 
@@ -286,16 +286,17 @@ df_startofcovid_gtrends %>%
   labs(
     x = "Date", 
     y = "Hits", 
-    title = "Relative hits for several search queries"
+    title = "Relative hits for several search queries and daily COVID cases",
+    caption = "COVID cases are represented by the dashed black line."
   ) +
   geom_line(
     data = df_nyt_national_startofcovid, 
     mapping = aes(
       x = as.POSIXct(date), 
       y = dcases_dt, 
-      color = "covid cases"
-    ), 
-    linetype = "dashed"
+      linetype = "covid cases"
+    ),
+    color = "black"
   ) +
   scale_y_continuous(
     name = "Daily COVID cases",
@@ -304,7 +305,6 @@ df_startofcovid_gtrends %>%
   scale_color_manual(
     labels = c(
       "Animal Crossing", 
-      "New Covid Cases in the US", 
       "Dalgona Coffee", 
       "Tiger King", 
       "TikTok", 
@@ -312,12 +312,15 @@ df_startofcovid_gtrends %>%
     ),
     values = c(
       "blue", 
-      "black", 
       "purple", 
       "orange", 
       "red", 
       "green"
     )
+  ) +
+  scale_linetype_manual(
+    labels = c("New Covid Cases in the US"),
+    values = c("dashed")
   ) +
   theme(legend.title = element_blank())
 ```
@@ -465,7 +468,7 @@ df_vax %>%
     aes(x = date, y = hits * scale_factor, color = keyword)
   ) +
   scale_y_continuous(
-    name = "Number of Vaccinated People in US", 
+    name = "Daily Vaccinations in the United States", 
     sec.axis=sec_axis(~. / scale_factor, name="Popularity of Google Search"))
 
 ```
@@ -602,7 +605,6 @@ In this case we look at the search term "ivermectin for sale" which we believe i
 The other prominent form of misinformation we wanted to tackle was the discourse around vaccines and their hypothetical, if sometimes absurd, side effects. While vaccinations did not begin in earnest until the beginning of 2021, misinformation about them was spreading since the early days of the pandemic.
 
 ```{r}
-
 df_vaccine_5g <- 
   gtrends(
     c("vaccine 5g"), 
@@ -634,11 +636,27 @@ df_vax %>%
       x = date, 
       y = hits * scale_factor, 
       color = "Search popularity", 
-      linetype = "Search popularity")
+      linetype = "Search popularity"
+    )
   ) +
   scale_y_continuous(
     name = "Daily Vaccinations in the US", 
-    sec.axis = sec_axis(~./scale_factor, name="Popularity of Google Search")
+    sec.axis = sec_axis(~. / scale_factor, name = "Popularity of Google Search")
+  ) +
+  scale_color_manual(
+    name = "Data",
+    breaks = c("Search popularity", "Daily Vaccinations"),
+    values = c(
+      "Search popularity" = "darkred", 
+      "Daily Vaccinations" = "steelblue"
+    )
+  ) +
+  scale_linetype_manual(
+    name = "Data",
+    values = c(
+      "Search popularity" = 1, 
+      "Daily Vaccinations" = 2
+    )
   ) +
   labs(
     x = "Date", 
@@ -727,10 +745,7 @@ df_searches <- df_vax_death %>%
   bind_rows(df_vax_5g) %>%
   bind_rows(df_vax_microchip) %>%
   bind_rows(df_mesh_mask) %>%
-  pivot_wider(
-    names_from = keyword,
-    values_from = hits 
-  )
+  pivot_wider(names_from = keyword, values_from = hits)
 ```
 
 ```{r}
