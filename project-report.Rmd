@@ -191,7 +191,8 @@ df_covid_gtrends %>%
     x = "Date", 
     y = "Hits", 
     title = "Relative hits for several search queries"
-  )
+  ) +
+  theme_minimal()
 ```
 
 Graphs like this can tell us what people were searching for at any particular time, like the above example which shows the term "coronavirus" jumping then dropping dramatically as it was replaced with other terms. However, this data alone does not really tell us much about COVID without including more information.
@@ -218,7 +219,8 @@ df_nyt_national %>%
     name = "Daily COVID cases",
     sec.axis = sec_axis(~. * 1 / 3000, name="Search Popularity")
   ) +
-  labs(x = "Date")
+  labs(x = "Date") +
+  theme_minimal()
 ```
 If we take that same data and overlay daily COVID cases we start to get a clearer picture of what is happening. Here we can see that searches for "coronavirus" peaked very early on before there were almost any confirmed cases in the US. The three other terms then start to emerge just before and during the beginning of the first wave in the US and all but "covid" begin to die out to fractions of their previous levels. Interestingly, the search rate for "covid" tends to track relatively well with daily coronavirus cases, with a spike roughly corresponding to each of the major spikes in the data. It is also the only term to experience any significant increase during the major wave in the latter part of 2021.
 
@@ -325,7 +327,8 @@ df_startofcovid_gtrends %>%
     labels = c("New Covid Cases in the US"),
     values = c("dashed")
   ) +
-  theme(legend.title = element_blank())
+  theme(legend.title = element_blank()) +
+  theme_minimal()
 ```
 What we see in our graph largely follows both the data above and our lived experiences. We see a spike in "Tiger King" and "Animal Crossing" as lockdowns take over with cases soaring and our attention spans dropping. We also see searches for "toilet paper" spiking and then dropping as panic buying stops and the supply chain adapts. We are able to see how "Dalgona Coffee\`s" search popularity grew and dropped off, as well as seeing how searches for "TiKToK" have continued to grow consistently through the first months of the pandemic. Though we do not track all the search trends throughout the entire pandemic or include all the trends that Google Searches picked up, we were able to plot some of the notable cultural moments in the early days of the pandemic seeing how, as a culture, we were adapting as COVID case numbers changed.
 
@@ -374,7 +377,8 @@ df_nyt_national_twoweeks %>%
   scale_y_continuous(
     name = "Daily COVID cases",
     sec.axis = sec_axis(~. * 1 / scale_factor, name = "Search Popularity")
-  )
+  ) +
+  theme_minimal()
 ```
 Looking closer at a 2-week section of "Animal Crossing" data vs COVID cases we see an interesting trend. When the number of cases spikes, searches for "Animal Crossing" are at a low point. If we dig into this a little further we see that these oscillations have a period of about a week. In fact, we notice that April 6 and April 13 are both Mondays. This suggests that interest in "Animal Crossing" might be higher on these Sundays than the rest of the week and that COVID cases seem to be lower on Sundays and Mondays. "Animal Crossing" increases seem to make sense on the weekends when people have more free time and many COVID testing centers were closed on the weekends so tests that take about a day to come back would come in at lower rates on Sundays and Mondays.
 
@@ -415,7 +419,8 @@ df_nyt_national %>%
     name = "Number of New Cases", 
     sec.axis = sec_axis(~. / scale_factor, name = "Popularity of Google Search")
   ) +
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom') +
+  theme_minimal()
 ```
 
 ```{r}
@@ -431,7 +436,8 @@ df_vax %>%
   scale_y_continuous(
     name = "Daily Vaccinations in the United States", 
     sec.axis = sec_axis(~. / scale_factor, name = "Popularity of Google Search")
-  )
+  ) +
+  theme_minimal()
 ```
 
 There were noticeable changes in spending and saving habits from being stuck at home and, for some, having the ability to work remotely [8]. This increase in disposable income might account for greater participation or interest in the stock market, which in turn may explain some of the increases we see in searches on stock-related terms.
@@ -486,7 +492,8 @@ df_nyt_national %>%
   guides(
     fill = guide_legend(keywidth = 3, keyheight = 1), 
     linetype = guide_legend(keywidth = 3, keyheight = 1)
-  )
+  ) +
+  theme_minimal()
 ```
 Many of these spikes were driven by media attention that was often started by tweets or speeches from prominent political figures. For example, former president Donald Trump first [tweeted about hydroxychloroquine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7685699/) on the same day (March 21, 2020) as the first major spike in searches for the term[4].
 
@@ -553,7 +560,9 @@ df_nyt_national %>%
     title = 
       "Google search popularity for 'Ivermectin for sale'\n and Daily COVID cases in the U.S.",
     caption = "COVID data has been smoothed with a 7-day moving average to account\n for weekly inaccuracies due to test numbers decreasing on weekends."
-  )
+  ) + theme_minimal()
+
+ggsave("ivermectin.png", width = 8, height = 3, dpi = 2000)
 ```
 In this case we look at the search term "ivermectin for sale" which we believe is likely to be more closely linked with intention to buy and use the drug than a search for "ivermectin". When we look at this in relation to daily COVID cases we see that after about the third quarter of 2020 the two become highly correlated. As cases increased in the early and middle parts of 2021 searches also rose and as cases fell in the summer searches did as well. This close linking with COVID numbers suggests there is likely an explanation beyond news coverage that accounts for the search volume.
 
@@ -621,7 +630,8 @@ df_vax %>%
     title = 
       "Google search popularity for 'vaccine 5g' and daily vaccinations"
   ) +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_minimal()
 ```
 
 The term 'vaccine 5g' was trending as early as March 15, 2020, as US COVID numbers were just starting to increase, and months before any viable vaccine was in human trials. The increase in early 2020 was likely related to news coverage on the topic which began as early as [May 18](https://maldita.es/malditaciencia/20200518/post-facebook-coronavirus-vacunas-chemtrails-5g/) [5]. The BBC did an analysis of [social media posts related to the topic](https://www.bbc.com/news/53191523) and found that they had substantial reach across the globe [6]. In this case it is actually interesting to note that searches do not seem to be well correlated with vaccination rates but rather with critical events in the vaccination timeline. We see a spike at the very beginning of the pandemic, a spike as large-scale vaccinations begin, and a few more spikes as vaccinations increase then taper off. Not all of the trends in searches can be explained by events, but the trends do seem to overlap with many of those events.

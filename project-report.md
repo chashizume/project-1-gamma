@@ -436,7 +436,8 @@ df_covid_gtrends %>%
     x = "Date", 
     y = "Hits", 
     title = "Relative hits for several search queries"
-  )
+  ) +
+  theme_minimal()
 ```
 
 ![](project-report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
@@ -469,7 +470,8 @@ df_nyt_national %>%
     name = "Daily COVID cases",
     sec.axis = sec_axis(~. * 1 / 3000, name="Search Popularity")
   ) +
-  labs(x = "Date")
+  labs(x = "Date") +
+  theme_minimal()
 ```
 
     ## Warning: Removed 1 row(s) containing missing values (geom_path).
@@ -664,7 +666,8 @@ df_startofcovid_gtrends %>%
     labels = c("New Covid Cases in the US"),
     values = c("dashed")
   ) +
-  theme(legend.title = element_blank())
+  theme(legend.title = element_blank()) +
+  theme_minimal()
 ```
 
 ![](project-report_files/figure-gfm/unnamed-chunk-5-1.png)<!-- --> What
@@ -726,7 +729,8 @@ df_nyt_national_twoweeks %>%
   scale_y_continuous(
     name = "Daily COVID cases",
     sec.axis = sec_axis(~. * 1 / scale_factor, name = "Search Popularity")
-  )
+  ) +
+  theme_minimal()
 ```
 
 ![](project-report_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
@@ -793,7 +797,8 @@ df_nyt_national %>%
     name = "Number of New Cases", 
     sec.axis = sec_axis(~. / scale_factor, name = "Popularity of Google Search")
   ) +
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom') +
+  theme_minimal()
 ```
 
     ## Warning: Removed 1 row(s) containing missing values (geom_path).
@@ -813,7 +818,8 @@ df_vax %>%
   scale_y_continuous(
     name = "Daily Vaccinations in the United States", 
     sec.axis = sec_axis(~. / scale_factor, name = "Popularity of Google Search")
-  )
+  ) +
+  theme_minimal()
 ```
 
 ![](project-report_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
@@ -907,7 +913,8 @@ df_nyt_national %>%
   guides(
     fill = guide_legend(keywidth = 3, keyheight = 1), 
     linetype = guide_legend(keywidth = 3, keyheight = 1)
-  )
+  ) +
+  theme_minimal()
 ```
 
     ## Warning: Removed 1 row(s) containing missing values (geom_path).
@@ -992,11 +999,16 @@ df_nyt_national %>%
     title = 
       "Google search popularity for 'Ivermectin for sale'\n and Daily COVID cases in the U.S.",
     caption = "COVID data has been smoothed with a 7-day moving average to account\n for weekly inaccuracies due to test numbers decreasing on weekends."
-  )
+  ) + theme_minimal()
 ```
 
-![](project-report_files/figure-gfm/unnamed-chunk-11-1.png)<!-- --> In
-this case we look at the search term “ivermectin for sale” which we
+![](project-report_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+``` r
+ggsave("ivermectin.png", width = 8, height = 3, dpi = 2000)
+```
+
+In this case we look at the search term “ivermectin for sale” which we
 believe is likely to be more closely linked with intention to buy and
 use the drug than a search for “ivermectin”. When we look at this in
 relation to daily COVID cases we see that after about the third quarter
@@ -1074,7 +1086,8 @@ df_vax %>%
     title = 
       "Google search popularity for 'vaccine 5g' and daily vaccinations"
   ) +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_minimal()
 ```
 
 ![](project-report_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
